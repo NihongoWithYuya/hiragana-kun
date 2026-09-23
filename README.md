@@ -4,7 +4,7 @@
 **五十音表**からどの文字にも入れて、**書き順をアニメーションで見て**、そのまま**なぞり書き**で練習できます。
 UI は英語（学習者が読めるように）、練習する文字はかなです。
 
-**公開ページ → https://nihongowithyuya.github.io/hiragana-kun/**（未公開）
+**公開ページ → https://nihongowithyuya.github.io/hiragana-kun/**
 
 ## できること
 
