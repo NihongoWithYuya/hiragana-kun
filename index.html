@@ -256,6 +256,35 @@ body.quiz-on #quizPlay{display:block}
 #quizChoices button.wrong{opacity:.28}
 #quizChoices button.right{color:#0e1020;background:var(--aqua);border-color:transparent;font-weight:700;
                           box-shadow:0 0 30px rgba(92,230,213,.4)}
+#quizChoices.two button{padding:26px 6px;font-size:clamp(34px,11vw,46px)}
+#quizChoices.two button.rj{font-size:clamp(20px,6vw,26px)}
+/* compare panel: shown after picking a look-alike */
+#quizCompare{display:none;margin:0 0 14px;padding:14px 12px;border:1px solid rgba(255,95,158,.35);border-radius:16px;
+             background:rgba(255,95,158,.06);text-align:center;cursor:pointer}
+#quizCompare.on{display:block}
+#quizCompare .pair{display:flex;align-items:center;justify-content:center;gap:12px}
+#quizCompare figure{margin:0}
+#quizCompare svg{display:block;height:min(28vw,108px);width:min(28vw,108px);border:1px solid var(--edge);border-radius:12px;
+                 background:rgba(255,255,255,.03)}
+#quizCompare svg.wide{width:min(56vw,216px)}
+#quizCompare .st{fill:none;stroke:#fff;stroke-width:5.6;stroke-linecap:round;stroke-linejoin:round;
+                 filter:drop-shadow(0 0 4px rgba(92,230,213,.8))}
+#quizCompare .guide{stroke:rgba(255,255,255,.14);stroke-width:.6;stroke-dasharray:2 6;fill:none}
+#quizCompare figcaption{margin-top:6px;font-family:Outfit,sans-serif;font-size:12px;letter-spacing:.1em;color:var(--sub)}
+#quizCompare figcaption b{font-family:"Hiragino Sans",sans-serif;font-size:16px;color:var(--ink);font-weight:500;margin-right:4px}
+#quizCompare .vs{font-family:Outfit,sans-serif;font-size:11px;letter-spacing:.2em;color:var(--pink)}
+#quizCompare p{margin-top:10px;font-size:12.5px;line-height:1.7}
+#quizCompare small{display:block;font-family:Outfit,sans-serif;font-size:10px;letter-spacing:.12em;color:var(--sub);margin-top:6px}
+/* the learner's own look-alike troubles, on the quiz start screen */
+#troubles{display:none;margin:0 0 14px;text-align:left;border:1px solid rgba(255,95,158,.35);border-radius:16px;
+          padding:12px 14px;background:rgba(255,95,158,.05)}
+#troubles.on{display:block}
+#troubles h3{font-family:Outfit,sans-serif;font-size:11px;font-weight:500;letter-spacing:.16em;color:var(--pink);
+             text-transform:uppercase;margin-bottom:10px}
+#troubles .chips{display:flex;flex-wrap:wrap;gap:8px}
+#troubles button{padding:8px 14px;border-radius:999px;font-size:17px}
+#troubles button small{font-family:Outfit,sans-serif;font-size:11px;color:var(--pink);margin-left:6px}
+#troubles p{font-size:11.5px;color:var(--sub);margin-top:9px}
 #quizEnd{display:none;text-align:center}
 body.quiz-done #quizPlay{display:none}
 body.quiz-done #quizEnd{display:block}
@@ -323,6 +352,7 @@ footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid 
   <section id="quizPane">
     <div id="quizStart">
       <p class="lead">Pick what to practise. <b>10 questions</b> each round.</p>
+      <div id="troubles"></div>
       <div class="scopes" id="scopeList"></div>
     </div>
 
@@ -334,6 +364,7 @@ footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid 
       </div>
       <div id="quizQ"></div>
       <div id="quizMsg"></div>
+      <div id="quizCompare"></div>
       <div id="quizChoices"></div>
     </div>
 
@@ -423,6 +454,44 @@ const CONFUSE = [
   ['チ','テ','キ'],['ナ','メ','ノ'],['ハ','ル','ヘ'],['セ','サ'],['エ','ユ'],['ラ','ヲ'],
 ];
 
+/* look-alike pairs with the one thing that tells them apart — the Look-alikes drill and the
+   compare panel shown after picking the twin */
+const LOOKALIKES = [
+  ['い','り','い: two short strokes, a gap between · り: the right stroke is long and sweeps down'],
+  ['さ','ち','さ: the bottom is a small separate curve, like c · ち: the bottom curve is joined and bulges right, like 5'],
+  ['さ','き','さ: one cross line · き: two cross lines'],
+  ['ぬ','め','ぬ: ends with a small loop · め: no loop'],
+  ['ね','れ','ね: ends with a small loop · れ: ends with a kick out to the right'],
+  ['れ','わ','れ: ends with a kick out to the right · わ: ends with a round curve'],
+  ['は','ほ','は: one cross line, the right line pokes out on top · ほ: two cross lines, nothing pokes out on top'],
+  ['る','ろ','る: ends with a small loop · ろ: no loop'],
+  ['す','む','す: after the loop it goes straight down · む: after the loop it turns right, plus a dot'],
+  ['し','つ','し: goes down, then curves up · つ: goes across, then curves down'],
+  ['あ','お','あ: a line across and a line down through it · お: a line across and a dot on the right'],
+  ['ま','よ','ま: two cross lines · よ: one short line on the right'],
+  ['け','は','け: the right side is a long line down · は: the right side has a loop'],
+  ['た','な','た: two small lines on the right · な: a loop at the bottom right'],
+  ['う','ら','う: a dash on top, then the curve · ら: a dot on top, a short line down, then the curve'],
+  ['シ','ツ','シ: dots side by side, the last stroke goes UP ↗ · ツ: dots on top, the last stroke goes DOWN ↙'],
+  ['ソ','ン','ソ: the long stroke goes DOWN from the top ↙ · ン: the long stroke goes UP from the bottom ↗'],
+  ['ソ','リ','ソ: the long stroke slants down from the top right · リ: two lines standing side by side, the right one is long'],
+  ['シ','ン','シ: two dots · ン: one dot'],
+  ['ク','ケ','ク: the second stroke bends down, like 7 · ケ: a flat line, then a separate stroke down'],
+  ['ク','タ','ク: nothing inside · タ: one small stroke inside'],
+  ['ク','ワ','ク: starts with a short slant · ワ: starts with a short vertical line'],
+  ['ウ','ワ','ウ: a dot on top · ワ: no dot'],
+  ['ス','ヌ','ス: the small stroke starts from the long one · ヌ: the small stroke crosses the long one'],
+  ['コ','ユ','コ: closed on the right · ユ: the bottom line sticks out'],
+  ['コ','ロ','コ: open on the left · ロ: a closed box'],
+  ['ア','マ','ア: the second stroke comes down from the middle · マ: a small tick at the bottom'],
+  ['マ','ム','マ: the tick is at the bottom middle · ム: the tick is on the right'],
+  ['チ','テ','チ: the top is a slanted stroke · テ: the top is a flat line'],
+  ['ナ','メ','ナ: a flat line across · メ: two slanted strokes'],
+  ['ハ','ル','ハ: two strokes apart · ル: the right stroke kicks up'],
+  ['セ','サ','セ: one vertical line, bent at the bottom · サ: two vertical lines'],
+  ['エ','ユ','エ: a vertical line in the middle · ユ: an open box shape'],
+].filter(p => !NO_QUIZ.has(p[0]) && !NO_QUIZ.has(p[1]));
+
 /* ================= build item index ================= */
 const ITEMS = {};      // kana -> {k,r,w,wr,we,note,grp,row,sc}
 const ORDERS = { hira:[], kata:[] };
@@ -445,7 +514,7 @@ Object.keys(SCRIPTS).forEach(sc => {
 
 /* ================= storage ================= */
 const KEY = 'hiragana-kun.v1';
-let ST = { v:1, traced:{}, quiz:{}, muted:false, slow:false };
+let ST = { v:1, traced:{}, quiz:{}, mix:{}, muted:false, slow:false };
 try {
   const raw = localStorage.getItem(KEY);
   if (raw) ST = Object.assign(ST, JSON.parse(raw));
@@ -573,26 +642,32 @@ function strokesOf(kana){
   else { push(kana[0], 1, 0, 0); push(kana[1], .85, 117, 16); }
   return out;
 }
-function renderGlyph(kana){
-  const wide = kana.length > 1;
-  glyphBox.classList.toggle('wide', wide);
-  svgEl.setAttribute('viewBox', wide ? '0 0 218 109' : '0 0 109 109');
-  const W = wide ? 218 : 109;
+/* full = the card glyph (ids, stroke numbers, start dot); otherwise a bare copy for the quiz compare panel */
+function glyphMarkup(kana, full){
+  const W = kana.length > 1 ? 218 : 109;
   let html = '<g class="guide">' +
     '<line x1="' + W/2 + '" y1="4" x2="' + W/2 + '" y2="105"/>' +
     '<line x1="4" y1="54.5" x2="' + (W-4) + '" y2="54.5"/>' +
-    (wide ? '<line x1="109" y1="4" x2="109" y2="105"/>' : '') + '</g>';
+    (W > 109 ? '<line x1="109" y1="4" x2="109" y2="105"/>' : '') + '</g>';
   const sts = strokesOf(kana);
   sts.forEach((s, i) => {
-    html += '<path class="st" id="st' + i + '" d="' + s.d + '" transform="translate(' +
+    html += '<path class="st"' + (full ? ' id="st' + i + '"' : '') + ' d="' + s.d + '" transform="translate(' +
       s.dx + ',' + s.dy + ') scale(' + s.sc + ')"/>';
   });
-  sts.forEach((s, i) => {
-    html += '<text class="num" id="num' + i + '" x="' + s.num[0] + '" y="' + s.num[1] + '">' + (i+1) + '</text>';
-  });
-  html += '<circle id="startDot" cx="0" cy="0" r="4"/>';
-  svgEl.innerHTML = html;
-  return sts.length;
+  if (full){
+    sts.forEach((s, i) => {
+      html += '<text class="num" id="num' + i + '" x="' + s.num[0] + '" y="' + s.num[1] + '">' + (i+1) + '</text>';
+    });
+    html += '<circle id="startDot" cx="0" cy="0" r="4"/>';
+  }
+  return { html, W, n: sts.length };
+}
+function renderGlyph(kana){
+  const g = glyphMarkup(kana, true);
+  glyphBox.classList.toggle('wide', g.W > 109);
+  svgEl.setAttribute('viewBox', '0 0 ' + g.W + ' 109');
+  svgEl.innerHTML = g.html;
+  return g.n;
 }
 function paths(){ return Array.prototype.slice.call(svgEl.querySelectorAll('.st')); }
 function numEl(i){ return svgEl.querySelector('#num' + i); }
@@ -902,11 +977,86 @@ function buildScopes(){
     { id:'youon', label:'Combined', sub: kata ? 'youon キャ・シャ…' : 'youon きゃ・しゃ…', pick:() => TB.youon.flat() },
   ];
   if (TB.foreign) SCOPES.push({ id:'foreign', label:'Foreign sounds', sub:'ファ・ティ・ヴ…', pick:() => TB.foreign.flat() });
+  SCOPES.push({ id:'alike', label:'Look-alikes', sub: kata ? 'シ/ツ・ソ/ン… two choices' : 'い/り・さ/ち… two choices', pick:() => null });
   SCOPES.push({ id:'weak', label:'My weak spots', sub:'what you keep missing', pick:() => null });
   document.getElementById('scopeList').innerHTML = SCOPES.map(s =>
     '<button class="glass" data-s="' + s.id + '">' + s.label + '<small>' + s.sub + '</small></button>').join('');
+  renderTroubles();
 }
 let Q = { list:[], i:0, score:0, item:null, tries:0, type:'' };
+
+/* ---------- look-alike troubles ----------
+   ST.mix counts each mix-up as an unordered pair ("シ|ツ": 3). A pair becomes a trouble after one
+   mix-up if it is a known look-alike, or after two if it is not. Picking right on the first try
+   while the twin is on screen takes one off, so pairs the learner has sorted out drop away. */
+const pairKey = (a, b) => [a, b].sort().join('|');
+function lookalike(a, b){ return LOOKALIKES.find(p => (p[0] === a && p[1] === b) || (p[0] === b && p[1] === a)); }
+function mixCount(a, b){ return ST.mix[pairKey(a, b)] || 0; }
+function isTrouble(a, b){ const n = mixCount(a, b); return n >= 2 || (n >= 1 && !!lookalike(a, b)); }
+function bumpMix(a, b, d){
+  const k = pairKey(a, b), n = (ST.mix[k] || 0) + d;
+  if (n > 0) ST.mix[k] = n; else delete ST.mix[k];
+}
+function troublePairs(){
+  return Object.keys(ST.mix).map(k => { const p = k.split('|'); return { a:p[0], b:p[1], n:ST.mix[k] }; })
+    .filter(p => ITEMS[p.a] && ITEMS[p.b] && ITEMS[p.a].sc === script && isTrouble(p.a, p.b))
+    .sort((x, y) => y.n - x.n);
+}
+function renderTroubles(){
+  const box = document.getElementById('troubles'), list = troublePairs();
+  box.classList.toggle('on', list.length > 0);
+  box.innerHTML = list.length ? '<h3>Your look-alike troubles</h3><div class="chips">' +
+    list.slice(0, 8).map(p => '<button class="glass" data-a="' + p.a + '" data-b="' + p.b + '">' +
+      p.a + ' ↔ ' + p.b + '<small>×' + p.n + '</small></button>').join('') +
+    '</div><p>Tap a pair to drill just those two.</p>' : '';
+}
+document.getElementById('troubles').addEventListener('click', e => {
+  const b = e.target.closest('button[data-a]');
+  if (b) startQuiz('alike', [b.dataset.a, b.dataset.b]);
+});
+/* drill pairs: the learner's troubles twice over, then the standard look-alikes of this script */
+function alikeQuestions(only){
+  let pairs;
+  if (only) pairs = [only];
+  else {
+    const mine = troublePairs().map(p => [p.a, p.b]);
+    const std = shuffle(LOOKALIKES.filter(p => ITEMS[p[0]] && ITEMS[p[0]].sc === script && !mixCount(p[0], p[1])));
+    pairs = mine.concat(mine, std).slice(0, 10);
+  }
+  const qs = [];
+  for (let i = 0; i < 10; i++){
+    const p = pairs[i % pairs.length], flip = Math.random() < .5;
+    qs.push(flip ? [p[1], p[0]] : [p[0], p[1]]);
+  }
+  return shuffle(qs);
+}
+
+/* ---------- compare panel ---------- */
+function playMini(svg){
+  let t = 200;
+  svg.querySelectorAll('.st').forEach(p => {
+    const L = p.getTotalLength(), dur = Math.min(900, Math.max(300, L * 7));
+    p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L;
+    p.animate([{ strokeDashoffset: L }, { strokeDashoffset: 0 }], { duration: dur, delay: t, easing: 'ease-in-out', fill: 'forwards' });
+    t += dur + 120;
+  });
+}
+function showCompare(a, b){
+  const box = document.getElementById('quizCompare'), la = lookalike(a, b);
+  const side = k => {
+    const g = glyphMarkup(k, false);
+    return '<figure><svg class="' + (g.W > 109 ? 'wide' : '') + '" viewBox="0 0 ' + g.W + ' 109">' + g.html + '</svg>' +
+      '<figcaption><b>' + k + '</b>' + ITEMS[k].r + '</figcaption></figure>';
+  };
+  box.innerHTML = '<div class="pair">' + side(a) + '<span class="vs">VS</span>' + side(b) + '</div>' +
+    '<p>' + (la ? la[2].split(' · ').join('<br>') : 'Easy to mix up — watch how each one is written.') + '</p><small>TAP TO REPLAY</small>';
+  box.classList.add('on');
+  box.querySelectorAll('svg').forEach(playMini);
+  Q.compared = true;
+}
+document.getElementById('quizCompare').addEventListener('click', e => {
+  e.currentTarget.querySelectorAll('svg').forEach(playMini);
+});
 
 document.getElementById('scopeList').addEventListener('click', e => {
   const b = e.target.closest('button[data-s]');
@@ -931,7 +1081,7 @@ function shuffle(a){
   return a;
 }
 function distractors(k, pool, n){
-  const out = [];
+  const out = troublePairs().filter(p => p.a === k || p.b === k).map(p => p.a === k ? p.b : p.a);
   const group = CONFUSE.find(g => g.indexOf(k) >= 0);
   if (group) group.forEach(c => { if (c !== k && ITEMS[c] && out.indexOf(c) < 0) out.push(c); });
   const same = pool.filter(c => c !== k && out.indexOf(c) < 0 && ITEMS[c].row === ITEMS[k].row);
@@ -945,11 +1095,17 @@ function distractors(k, pool, n){
     seen[r] = 1; return true;
   }).slice(0, n);
 }
-function startQuiz(scopeId){
-  const pool = poolFor(scopeId);
-  const picked = shuffle(pool.slice()).slice(0, 10);
-  while (picked.length < 10 && pool.length) picked.push(pool[Math.floor(Math.random() * pool.length)]);
-  Q = { list:picked, i:0, score:0, pool:pool, item:null, tries:0, type:'' };
+function startQuiz(scopeId, only){
+  let picked, pool, partner = null;
+  if (scopeId === 'alike'){
+    const qs = alikeQuestions(only);
+    picked = qs.map(q => q[0]); partner = qs.map(q => q[1]); pool = picked;
+  } else {
+    pool = poolFor(scopeId);
+    picked = shuffle(pool.slice()).slice(0, 10);
+    while (picked.length < 10 && pool.length) picked.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
+  Q = { list:picked, partner:partner, i:0, score:0, pool:pool, item:null, tries:0, type:'', compared:false, fresh:[] };
   document.body.classList.add('quiz-on');
   document.body.classList.remove('quiz-done');
   nextQuestion();
@@ -964,6 +1120,8 @@ function nextQuestion(){
   document.getElementById('quizScore').innerHTML = '<b>' + Q.score + '</b> / ' + Q.list.length;
   document.getElementById('quizMsg').textContent = '';
   document.getElementById('quizMsg').className = '';
+  document.getElementById('quizCompare').className = '';
+  Q.compared = false;
   const qEl = document.getElementById('quizQ');
   qEl.className = '';
   const it = ITEMS[Q.item];
@@ -976,9 +1134,10 @@ function nextQuestion(){
     setTimeout(() => speak(it.k), 250);
     qEl.querySelector('#qAudio').addEventListener('click', () => speak(it.k));
   }
-  const wrongs = distractors(Q.item, Q.pool, 3);
+  const wrongs = Q.partner ? [Q.partner[Q.i]] : distractors(Q.item, Q.pool, 3);
   const opts = shuffle([Q.item].concat(wrongs));
   const asRomaji = Q.type === 'k2r';
+  document.getElementById('quizChoices').classList.toggle('two', opts.length === 2);
   document.getElementById('quizChoices').innerHTML = opts.map(k =>
     '<button class="glass' + (asRomaji ? ' rj' : '') + '" data-k="' + k + '">' +
     (asRomaji ? ITEMS[k].r : k) + '</button>').join('');
@@ -992,7 +1151,13 @@ document.getElementById('quizChoices').addEventListener('click', e => {
   if (b.dataset.k === Q.item){
     b.classList.add('right');
     qEl.classList.add('flash-ok');
-    if (Q.tries === 0){ Q.score++; st.c++; }
+    if (Q.tries === 0){
+      Q.score++; st.c++;
+      // told the twin apart this time
+      document.querySelectorAll('#quizChoices button[data-k]').forEach(x => {
+        if (x.dataset.k !== Q.item && mixCount(Q.item, x.dataset.k)) bumpMix(Q.item, x.dataset.k, -1);
+      });
+    }
     st.x = Math.max(0, st.x - (Q.tries === 0 ? 1 : 0));
     save();
     msg.textContent = it.k + ' = ' + it.r + (it.w ? '  (' + it.w + ' — ' + it.we + ')' : '');
@@ -1001,12 +1166,17 @@ document.getElementById('quizChoices').addEventListener('click', e => {
     speak(it.k);
     document.getElementById('quizScore').innerHTML = '<b>' + Q.score + '</b> / ' + Q.list.length;
     Array.prototype.forEach.call(document.querySelectorAll('#quizChoices button'), x => x.disabled = true);
-    setTimeout(() => { Q.i++; buildChart(); nextQuestion(); }, 1150);
+    setTimeout(() => { Q.i++; buildChart(); nextQuestion(); }, Q.compared ? 2000 : 1150);
   } else {
     b.classList.add('wrong');
     qEl.classList.add('flash-ng');
     setTimeout(() => qEl.classList.remove('flash-ng'), 300);
-    if (Q.tries === 0){ st.x = (st.x || 0) + 1; save(); }
+    if (Q.tries === 0){ st.x = (st.x || 0) + 1; }
+    const got = b.dataset.k, was = isTrouble(Q.item, got);
+    bumpMix(Q.item, got, 1);
+    if (!was && isTrouble(Q.item, got)) Q.fresh.push([Q.item, got]);
+    save();
+    if (isTrouble(Q.item, got)) showCompare(Q.item, got);
     Q.tries++;
     msg.textContent = 'Not quite — that one is ' + ITEMS[b.dataset.k].r + '. Try again!';
     msg.className = 'ng';
@@ -1021,10 +1191,13 @@ function endQuiz(){
   document.getElementById('endMsg').textContent = s === n ? 'Perfect! You really know these.'
     : s >= n * .7 ? 'Nice work! A few more rounds and they are yours.'
     : 'Keep going — tap a character in the chart to see how it is written.';
-  save(); buildChart();
+  if (Q.fresh.length) document.getElementById('endMsg').textContent += ' You mixed up ' +
+    Q.fresh.map(p => p[0] + ' and ' + p[1]).join(', ') + ' — try the Look-alikes drill.';
+  save(); buildChart(); renderTroubles();
 }
 document.getElementById('quizQuit').addEventListener('click', () => {
   document.body.classList.remove('quiz-on','quiz-done');
+  renderTroubles();
 });
 document.getElementById('quizAgain').addEventListener('click', () => {
   document.body.classList.remove('quiz-on','quiz-done');
