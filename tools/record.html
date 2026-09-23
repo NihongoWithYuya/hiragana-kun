@@ -263,7 +263,7 @@ function render(){
   $('hint').innerHTML = it.w
     ? '例: ' + it.w + '（' + it.wr + ' — ' + it.we + '）<br>読むのは <b>' + it.k + '</b> の音だけです'
     : '読むのは <b>' + it.k + '</b> の音だけです';
-  const n = Object.keys(have).length;
+  const n = ITEMS.filter(x => have[keyOf(x.k)]).length;   // the folder also holds the other set's files
   $('doneCount').innerHTML = '録音済み <b>' + n + '</b> / ' + ITEMS.length;
   $('list').innerHTML = ITEMS.map((x, i) =>
     '<button class="' + (have[keyOf(x.k)] ? 'has ' : '') + (i === idx ? 'cur' : '') + '" data-i="' + i + '">' +
