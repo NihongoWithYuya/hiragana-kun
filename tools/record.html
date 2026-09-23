@@ -119,6 +119,12 @@ T.dakuten.forEach(row => row.forEach(push));
 T.small.forEach(push);
 T.youon.forEach(row => row.forEach(push));
 
+/* ?set=foreign — katakana-only sounds (ファ, ティ…). Other katakana reuse the hiragana recordings. */
+if (new URLSearchParams(location.search).get('set') === 'foreign'){
+  ITEMS.length = 0;
+  window.KATAKANA_TABLES.foreign.forEach(row => row.forEach(push));
+}
+
 /* ?only=ひ,ふ,ほ — re-record just these */
 const only = new URLSearchParams(location.search).get('only');
 if (only){

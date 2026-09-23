@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch hiragana stroke paths from KanjiVG and emit stroke-data.js.
+"""Fetch hiragana + katakana stroke paths from KanjiVG and emit stroke-data.js.
 
 Usage:  python3 tools/build_strokes.py
 Output: stroke-data.js  (window.KANA_STROKES)
@@ -18,7 +18,10 @@ API_COMMIT = "https://api.github.com/repos/KanjiVG/kanjivg/commits/master"
 SEION = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"
 DAKUTEN = "がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ"
 SMALL = "ゃゅょっ"
-CHARS = SEION + DAKUTEN + SMALL
+K_SEION = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン"
+K_DAKUTEN = "ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ"
+K_EXTRA = "ャュョッァィゥェォーヴ"   # small kana, long mark, ヴ (foreign sounds)
+CHARS = SEION + DAKUTEN + SMALL + K_SEION + K_DAKUTEN + K_EXTRA
 
 PATH_RE = re.compile(r'<path id="kvg:([0-9a-f]+)-s(\d+)"[^>]*\sd="([^"]+)"')
 NUM_RE = re.compile(r'<text transform="matrix\(1 0 0 1 ([\d.-]+) ([\d.-]+)\)">(\d+)</text>')
@@ -67,7 +70,7 @@ def main():
     out = root / "stroke-data.js"
     out.write_text(
         "/*!\n"
-        " * Hiragana stroke path data derived from KanjiVG (commit %s).\n"
+        " * Hiragana / katakana stroke path data derived from KanjiVG (commit %s).\n"
         " * KanjiVG is copyright (c) 2009-2025 Ulrich Apel and released under the\n"
         " * Creative Commons Attribution-Share Alike 3.0 licence.\n"
         " * https://kanjivg.tagaini.net  |  https://creativecommons.org/licenses/by-sa/3.0/\n"

@@ -43,4 +43,57 @@
 
 
     window.KANA_TABLES = { seion:SEION_ROWS, dakuten:DAKUTEN_ROWS, small:SMALL_ROW, youon:YOUON_ROWS };
+
+  /* ---------- katakana: same sounds, loanword examples ---------- */
+  const K_SEION = [
+    ['ア|a|アイス|aisu|ice cream','イ|i|インク|inku|ink','ウ|u|ウール|uuru|wool','エ|e|エアコン|eakon|air conditioner','オ|o|オレンジ|orenji|orange'],
+    ['カ|ka|カメラ|kamera|camera','キ|ki|キウイ|kiui|kiwi','ク|ku|クッキー|kukkii|cookie','ケ|ke|ケーキ|keeki|cake','コ|ko|コーヒー|koohii|coffee'],
+    ['サ|sa|サラダ|sarada|salad','シ|shi|シャツ|shatsu|shirt|Looks like ツ — シ strokes go up from the left.','ス|su|スープ|suupu|soup','セ|se|セーター|seetaa|sweater','ソ|so|ソース|soosu|sauce|Looks like ン — ソ strokes go down from the top.'],
+    ['タ|ta|タクシー|takushii|taxi','チ|chi|チーズ|chiizu|cheese','ツ|tsu|ツアー|tsuaa|tour|Looks like シ — ツ strokes go down from the top.','テ|te|テレビ|terebi|TV','ト|to|トマト|tomato|tomato'],
+    ['ナ|na|ナイフ|naifu|knife','ニ|ni|ニュース|nyuusu|news','ヌ|nu|ヌードル|nuudoru|noodles','ネ|ne|ネクタイ|nekutai|necktie','ノ|no|ノート|nooto|notebook'],
+    ['ハ|ha|ハンバーガー|hanbaagaa|hamburger','ヒ|hi|ヒーター|hiitaa|heater','フ|fu|フランス|furansu|France','ヘ|he|ヘリコプター|herikoputaa|helicopter','ホ|ho|ホテル|hoteru|hotel'],
+    ['マ|ma|マスク|masuku|mask','ミ|mi|ミルク|miruku|milk','ム|mu|ムード|muudo|mood','メ|me|メロン|meron|melon','モ|mo|モデル|moderu|model'],
+    ['ヤ|ya|タイヤ|taiya|tyre','','ユ|yu|ユニフォーム|yunifoomu|uniform','','ヨ|yo|ヨーグルト|yooguruto|yogurt'],
+    ['ラ|ra|ラジオ|rajio|radio','リ|ri|リボン|ribon|ribbon','ル|ru|ルール|ruuru|rule','レ|re|レモン|remon|lemon','ロ|ro|ロボット|robotto|robot'],
+    ['ワ|wa|ワイン|wain|wine','','','','ヲ|wo|||Almost never used — the particle is written in hiragana を.'],
+    ['ン|n|パン|pan|bread|Never starts a word. Looks like ソ — ン strokes go up from the left.','','','',''],
+  ];
+  const K_DAKUTEN = [
+    ['ガ|ga|ガム|gamu|chewing gum','ギ|gi|ギター|gitaa|guitar','グ|gu|グラス|gurasu|glass','ゲ|ge|ゲーム|geemu|game','ゴ|go|ゴルフ|gorufu|golf'],
+    ['ザ|za|ピザ|piza|pizza','ジ|ji|ジュース|juusu|juice','ズ|zu|チーズ|chiizu|cheese','ゼ|ze|ゼロ|zero|zero','ゾ|zo|ゾーン|zoon|zone'],
+    ['ダ|da|ダンス|dansu|dance','ヂ|ji|||Very rare — almost always ジ.','ヅ|zu|||Very rare — almost always ズ.','デ|de|デザート|dezaato|dessert','ド|do|ドア|doa|door'],
+    ['バ|ba|バス|basu|bus','ビ|bi|ビル|biru|building','ブ|bu|ブーツ|buutsu|boots','ベ|be|ベッド|beddo|bed','ボ|bo|ボール|booru|ball'],
+    ['パ|pa|パン|pan|bread','ピ|pi|ピアノ|piano|piano','プ|pu|プール|puuru|swimming pool','ペ|pe|ペン|pen|pen','ポ|po|ポスト|posuto|postbox'],
+  ];
+  const K_SMALL = [
+    'ッ|small tsu|ベッド|beddo|bed|Makes a short pause and doubles the next consonant.',
+    'ャ|small ya|シャツ|shatsu|shirt|Joins the kana before it: シ + ャ = sha.',
+    'ュ|small yu|ジュース|juusu|juice|Joins the kana before it: ジ + ュ = ju.',
+    'ョ|small yo|ショップ|shoppu|shop|Joins the kana before it: シ + ョ = sho.',
+    'ー|long mark|ケーキ|keeki|cake|Makes the vowel before it long: ケ + ー = kee. No sound of its own.',
+  ];
+  const K_YOUON = [
+    ['キャ|kya|キャンプ|kyanpu|camping','キュ|kyu|バーベキュー|baabekyuu|barbecue','キョ|kyo|キョロキョロ|kyorokyoro|looking around'],
+    ['シャ|sha|シャツ|shatsu|shirt','シュ|shu|シューズ|shuuzu|shoes','ショ|sho|ショップ|shoppu|shop'],
+    ['チャ|cha|チャンス|chansu|chance','チュ|chu|シチュー|shichuu|stew','チョ|cho|チョコレート|chokoreeto|chocolate'],
+    ['ニャ|nya|ニャー|nyaa|meow','ニュ|nyu|メニュー|menyuu|menu','ニョ|nyo|ニョキニョキ|nyokinyoki|sprouting up'],
+    ['ヒャ|hya|||Rare in katakana.','ヒュ|hyu|ヒューズ|hyuuzu|fuse','ヒョ|hyo|ヒョウ|hyou|leopard'],
+    ['ミャ|mya|ミャンマー|myanmaa|Myanmar','ミュ|myu|ミュージカル|myuujikaru|musical','ミョ|myo|||Rare in katakana.'],
+    ['リャ|rya|||Rare in katakana.','リュ|ryu|リュック|ryukku|backpack','リョ|ryo|||Rare in katakana.'],
+    ['ギャ|gya|ギャグ|gyagu|gag, joke','ギュ|gyu|ギュッと|gyutto|tightly','ギョ|gyo|ギョーザ|gyooza|dumplings'],
+    ['ジャ|ja|ジャム|jamu|jam','ジュ|ju|ジュース|juusu|juice','ジョ|jo|ジョギング|jogingu|jogging'],
+    ['ビャ|bya|||Rare in katakana.','ビュ|byu|レビュー|rebyuu|review','ビョ|byo|||Rare in katakana.'],
+    ['ピャ|pya|||Rare in katakana.','ピュ|pyu|コンピューター|konpyuutaa|computer','ピョ|pyo|ピョンピョン|pyonpyon|hopping'],
+  ];
+  /* sounds only katakana has — for foreign words */
+  const K_FOREIGN = [
+    ['ファ|fa|ソファ|sofa|sofa','フィ|fi|フィルム|firumu|film','フェ|fe|カフェ|kafe|café'],
+    ['フォ|fo|フォーク|fooku|fork','ティ|ti|パーティー|paatii|party','ディ|di|ディナー|dinaa|dinner'],
+    ['トゥ|tu|タトゥー|tatuu|tattoo','ドゥ|du|ヒンドゥー|hinduu|Hindu','デュ|dyu|デュエット|dyuetto|duet'],
+    ['ウィ|wi|ウィンター|wintaa|winter','ウェ|we|ウェブ|webu|web','ウォ|wo|ウォッチ|wotchi|watch'],
+    ['シェ|she|シェフ|shefu|chef','ジェ|je|ジェット|jetto|jet','チェ|che|チェック|chekku|check'],
+    ['ヴァ|va|ヴァイオリン|vaiorin|violin|Often written バ instead: バイオリン.','ヴィ|vi|ヴィーナス|viinasu|Venus','ヴ|vu|ラヴ|ravu|love|Often written ブ instead: ラブ.'],
+    ['ヴェ|ve|ヴェール|veeru|veil','ヴォ|vo|ヴォーカル|vookaru|vocals','ツァ|tsa|モーツァルト|mootsaruto|Mozart'],
+  ];
+  window.KATAKANA_TABLES = { seion:K_SEION, dakuten:K_DAKUTEN, small:K_SMALL, youon:K_YOUON, foreign:K_FOREIGN };
 })();

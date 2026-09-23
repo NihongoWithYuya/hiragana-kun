@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Learn to read and write hiragana: full gojuon chart, animated stroke order, tracing practice and quizzes. ひらがなくん — 書き順アニメ付きのひらがな学習サイト。">
+<meta name="description" content="Learn to read and write hiragana and katakana: full gojuon chart, animated stroke order, tracing practice and quizzes. ひらがなくん — 書き順アニメ付きのひらがな・カタカナ学習サイト。">
 <title>ひらがなくん | Hiragana-kun</title>
 <meta name="theme-color" content="#0e1020">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>あ</text></svg>">
 <meta property="og:title" content="ひらがなくん | Hiragana-kun">
-<meta property="og:description" content="Learn to read and write hiragana — animated stroke order, tracing practice and quizzes.">
+<meta property="og:description" content="Learn to read and write hiragana and katakana — animated stroke order, tracing practice and quizzes.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,6 +56,18 @@ h1 small{
 }
 #score b{color:var(--aqua);font-weight:700}
 #muteBtn{width:42px;height:38px;font-size:16px;border-radius:12px}
+
+/* ---------- script switch (ひらがな / カタカナ) ---------- */
+#scriptSw{
+  display:flex;max-width:604px;margin:12px auto 0;padding:4px;gap:4px;
+  border:1px solid var(--edge);border-radius:999px;background:rgba(255,255,255,.03);
+}
+@media(max-width:640px){ #scriptSw{margin:12px 18px 0} }
+#scriptSw button{flex:1;padding:9px 4px;border-radius:999px;font-size:14px;letter-spacing:.12em;color:var(--sub)}
+body[data-script="hira"] #swHira, body[data-script="kata"] #swKata{
+  color:#0e1020;font-weight:700;background:linear-gradient(120deg,#7ff0e2,#5ce6d5);box-shadow:0 0 22px rgba(92,230,213,.35);
+}
+body:not([data-script="kata"]) #foreignSec{display:none}
 
 /* ---------- tabs ---------- */
 nav{display:flex;gap:8px;max-width:640px;margin:10px auto 0;padding:0 18px}
@@ -266,12 +278,17 @@ footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid 
 <body data-mode="chart" data-cmode="watch">
 
 <header>
-  <h1>ひらがなくん<small>HIRAGANA-KUN</small></h1>
+  <h1><span id="brand">ひらがなくん</span><small id="brandEn">HIRAGANA-KUN</small></h1>
   <div class="hud">
     <div id="score" class="glass"><b>0</b> / 108</div>
     <button id="muteBtn" class="glass" title="Sound on/off">🔊</button>
   </div>
 </header>
+
+<div id="scriptSw">
+  <button id="swHira" data-s="hira">ひらがな</button>
+  <button id="swKata" data-s="kata">カタカナ</button>
+</div>
 
 <nav>
   <button id="tabChart" class="glass">CHART</button>
@@ -283,7 +300,7 @@ footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid 
 <main>
   <section id="chartPane">
     <p class="lead">Tap any character to see <b>how to write it</b>, hear it, and trace it.<br>
-      Hiragana is the first alphabet of Japanese — 46 basic sounds.</p>
+      <span id="leadAbout">Hiragana is the first alphabet of Japanese — 46 basic sounds.</span></p>
 
     <h2>Basic 46 <span>seion &middot; the ones to learn first</span></h2>
     <div class="grid" id="gridSeion"></div>
@@ -297,6 +314,10 @@ footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid 
     <h2>Combined sounds <span>youon &middot; big + small kana</span></h2>
     <div class="grid youon" id="gridYouon"></div>
 
+    <div id="foreignSec">
+      <h2>Foreign sounds <span>only in katakana &middot; for loanwords</span></h2>
+      <div class="grid youon" id="gridForeign"></div>
+    </div>
   </section>
 
   <section id="quizPane">
@@ -372,40 +393,55 @@ footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid 
   </div>
 </div>
 
-<script src="kana-data.js"></script>
-<script src="stroke-data.js"></script>
-<script src="audio/manifest.js"></script>
+<script src="kana-data.js?v=2"></script>
+<script src="stroke-data.js?v=2"></script>
+<script src="audio/manifest.js?v=2"></script>
 <script>
 "use strict";
 
 /* ================= kana tables (kana-data.js) ================= */
-const _T = window.KANA_TABLES || { seion:[], dakuten:[], small:[], youon:[] };
-const SEION_ROWS = _T.seion, DAKUTEN_ROWS = _T.dakuten, SMALL_ROW = _T.small, YOUON_ROWS = _T.youon;
+const EMPTY = { seion:[], dakuten:[], small:[], youon:[] };
+const SCRIPTS = {
+  hira: { t: window.KANA_TABLES || EMPTY, name:'ひらがなくん', en:'HIRAGANA-KUN', title:'Hiragana-kun',
+          about:'Hiragana is the first alphabet of Japanese — 46 basic sounds.' },
+  kata: { t: window.KATAKANA_TABLES || EMPTY, name:'カタカナくん', en:'KATAKANA-KUN', title:'Katakana-kun',
+          about:'Katakana writes foreign words — the same 46 sounds as hiragana.' },
+};
+let script = 'hira';
+let TB = SCRIPTS.hira.t;   // tables of the script on screen
 
 /* characters excluded from quiz answers (duplicate sounds / not really used alone) */
-const NO_QUIZ = new Set(['ぢ','づ','っ','ゃ','ゅ','ょ','を','みゅ','ぴゅ','ひゅ','びゅ']);
+const NO_QUIZ = new Set(['ぢ','づ','っ','ゃ','ゅ','ょ','を','みゅ','ぴゅ','ひゅ','びゅ',
+  'ヂ','ヅ','ッ','ャ','ュ','ョ','ヲ','ー','ヒャ','ミョ','リャ','リョ','ビャ','ビョ','ピャ']);
 
 /* look-alike distractors — the mistakes beginners actually make */
 const CONFUSE = [
   ['ぬ','め','ね','れ'],['は','ほ','ま','ま'],['れ','わ','ね'],['さ','き','ち'],['る','ろ'],
   ['い','り'],['す','む'],['こ','に'],['し','つ'],['そ','ち'],['せ','さ'],['ん','そ'],
   ['あ','お'],['た','な'],['け','は'],['ら','う'],['ふ','ゐ'],['よ','ま'],
+  ['シ','ツ','ン','ソ'],['ク','ワ','ウ','ケ','タ'],['ス','ヌ','フ'],['コ','ユ','ロ'],['ア','マ','ム'],
+  ['チ','テ','キ'],['ナ','メ','ノ'],['ハ','ル','ヘ'],['セ','サ'],['エ','ユ'],['ラ','ヲ'],
 ];
 
 /* ================= build item index ================= */
-const ITEMS = {};      // kana -> {k,r,w,wr,we,note,grp,row}
-const ORDER = [];      // navigation order
-function parse(s, grp, row){
+const ITEMS = {};      // kana -> {k,r,w,wr,we,note,grp,row,sc}
+const ORDERS = { hira:[], kata:[] };
+let ORDER = ORDERS.hira;   // navigation order of the script on screen
+function parse(s, grp, row, sc){
   if (!s) return null;
   const p = s.split('|');
-  const it = { k:p[0], r:p[1], w:p[2]||'', wr:p[3]||'', we:p[4]||'', note:p[5]||'', grp, row };
-  ITEMS[it.k] = it; ORDER.push(it.k);
+  const it = { k:p[0], r:p[1], w:p[2]||'', wr:p[3]||'', we:p[4]||'', note:p[5]||'', grp, row, sc };
+  ITEMS[it.k] = it; ORDERS[sc].push(it.k);
   return it;
 }
-SEION_ROWS.forEach((row,i) => row.forEach(s => parse(s, 'seion', i)));
-DAKUTEN_ROWS.forEach((row,i) => row.forEach(s => parse(s, 'dakuten', i)));
-SMALL_ROW.forEach(s => parse(s, 'small', 0));
-YOUON_ROWS.forEach((row,i) => row.forEach(s => parse(s, 'youon', i)));
+Object.keys(SCRIPTS).forEach(sc => {
+  const t = SCRIPTS[sc].t;
+  t.seion.forEach((row,i) => row.forEach(s => parse(s, 'seion', i, sc)));
+  t.dakuten.forEach((row,i) => row.forEach(s => parse(s, 'dakuten', i, sc)));
+  t.small.forEach(s => parse(s, 'small', 0, sc));
+  t.youon.forEach((row,i) => row.forEach(s => parse(s, 'youon', i, sc)));
+  (t.foreign || []).forEach((row,i) => row.forEach(s => parse(s, 'foreign', i, sc)));
+});
 
 /* ================= storage ================= */
 const KEY = 'hiragana-kun.v1';
@@ -430,8 +466,14 @@ function learnedCount(){ return ORDER.filter(isLearned).length; }
    No speech synthesis: a robot reading single kana teaches the wrong sound. */
 let audioCtx = null, curAudio = null;
 const audioCache = {};
+/* katakana sounds the same as hiragana, so it plays the hiragana recording (ア → 3042.m4a);
+   only the foreign sounds (ファ, ティ…) have recordings of their own */
 function audioKey(kana){
-  return Array.from(kana).map(c => c.codePointAt(0).toString(16)).join('-');
+  const it = ITEMS[kana], own = it && it.grp === 'foreign';
+  return Array.from(kana).map(c => {
+    const cp = c.codePointAt(0);
+    return (!own && cp >= 0x30a1 && cp <= 0x30f6 ? cp - 0x60 : cp).toString(16);
+  }).join('-');
 }
 function hasAudio(kana){ return !!(window.KANA_AUDIO && window.KANA_AUDIO[audioKey(kana)]); }
 function speak(kana){
@@ -472,12 +514,37 @@ function buildChart(){
     el.innerHTML = rows.map(row => (Array.isArray(row) ? row : [row])
       .map(s => cellHTML(s ? ITEMS[s.split('|')[0]] : null)).join('')).join('');
   };
-  mk(SEION_ROWS, document.getElementById('gridSeion'));
-  mk(DAKUTEN_ROWS, document.getElementById('gridDakuten'));
-  mk([SMALL_ROW], document.getElementById('gridSmall'));
-  mk(YOUON_ROWS, document.getElementById('gridYouon'));
+  mk(TB.seion, document.getElementById('gridSeion'));
+  mk(TB.dakuten, document.getElementById('gridDakuten'));
+  mk([TB.small], document.getElementById('gridSmall'));
+  document.getElementById('gridSmall').style.gridTemplateColumns = 'repeat(' + TB.small.length + ',1fr)';
+  mk(TB.youon, document.getElementById('gridYouon'));
+  mk(TB.foreign || [], document.getElementById('gridForeign'));
   document.getElementById('score').innerHTML = '<b>' + learnedCount() + '</b> / ' + ORDER.length;
 }
+
+/* ================= script switch ================= */
+function setScript(sc){
+  if (!SCRIPTS[sc]) sc = 'hira';
+  const S = SCRIPTS[sc];
+  script = sc; TB = S.t; ORDER = ORDERS[sc];
+  if (ST.script !== sc){ ST.script = sc; save(); }
+  document.body.dataset.script = sc;
+  document.getElementById('brand').textContent = S.name;
+  document.getElementById('brandEn').textContent = S.en;
+  document.getElementById('leadAbout').textContent = S.about;
+  document.title = S.name + ' | ' + S.title;
+  history.replaceState(null, '', location.pathname + (sc === 'kata' ? '?kata' : '') + location.hash);
+  document.body.classList.remove('quiz-on', 'quiz-done');
+  buildScopes();
+  buildChart();
+}
+document.getElementById('scriptSw').addEventListener('click', e => {
+  const b = e.target.closest('button[data-s]');
+  if (!b || b.dataset.s === script) return;
+  if (document.body.classList.contains('card-open')) closeCard();
+  setScript(b.dataset.s);
+});
 document.querySelectorAll('.grid').forEach(g => {
   g.addEventListener('click', e => {
     const b = e.target.closest('.cell');
@@ -735,6 +802,7 @@ let pushedEntry = false;
 function openCard(kana, keepMode){
   const it = ITEMS[kana];
   if (!it) return;
+  if (it.sc !== script) setScript(it.sc);   // e.g. a shared #ア link while on hiragana
   const wasOpen = document.body.classList.contains('card-open');
   current = kana;
   document.body.classList.add('card-open');
@@ -754,14 +822,19 @@ function openCard(kana, keepMode){
   if (it.w) wb = '<div class="w">' + it.w + '</div><div class="wr">' + it.wr + '</div><div class="we">' + it.we + '</div>';
   if (it.note) wb += '<div class="note">💡 ' + it.note + '</div>';
   if (!canTrace) wb += '<div class="parts">Practise writing each part: ' +
-    '<button data-k="' + kana[0] + '">' + kana[0] + '</button>' +
-    '<button data-k="' + kana[1] + '">' + kana[1] + '</button></div>';
+    Array.from(kana).map(ch => '<button data-k="' + partOf(ch) + '">' + ch + '</button>').join('') + '</div>';
   document.getElementById('wordBox').innerHTML = wb || '<div class="we">—</div>';
   const sb = document.getElementById('sayBtn');
   sb.disabled = !hasAudio(kana);
-  sb.textContent = sb.disabled ? 'RECORDING SOON' : 'LISTEN';
+  sb.textContent = !sb.disabled ? 'LISTEN' : kana === 'ー' ? 'NO SOUND' : 'RECORDING SOON';
   setMode(canTrace && keepMode === 'trace' ? 'trace' : 'watch');
   if (!canTrace) setCardMsg('Two kana, one sound. Practise writing each part below.');
+}
+/* small ァィゥェォ have no card of their own — they are written like big ア… */
+function partOf(ch){
+  if (ITEMS[ch]) return ch;
+  const big = String.fromCodePoint(ch.codePointAt(0) + 1);
+  return ITEMS[big] ? big : ch;
 }
 function closeCard(){
   stopAnim(); tr.active = false;
@@ -814,22 +887,27 @@ document.getElementById('wordBox').addEventListener('click', e => {
 window.addEventListener('hashchange', () => {
   const k = decodeURIComponent(location.hash.slice(1));
   if (!k) closeCard();
-  else if (ITEMS[k] && k !== current) openCard(k);
+  else if (ITEMS[k] && (k !== current || !document.body.classList.contains('card-open'))) openCard(k);
   else if (!ITEMS[k]) closeCard();
 });
 window.addEventListener('resize', () => { if (tr.active) sizeCanvas(); });
 
 /* ================= quiz ================= */
-const SCOPES = [
-  { id:'seion', label:'All 46 basic', sub:'seion', pick:() => SEION_ROWS.flat() },
-  { id:'dakuten', label:'With marks', sub:'dakuten ゛゜', pick:() => DAKUTEN_ROWS.flat() },
-  { id:'youon', label:'Combined', sub:'youon きゃ・しゃ…', pick:() => YOUON_ROWS.flat() },
-  { id:'weak', label:'My weak spots', sub:'what you keep missing', pick:() => null },
-];
+let SCOPES = [];
+function buildScopes(){
+  const kata = script === 'kata';
+  SCOPES = [
+    { id:'seion', label:'All 46 basic', sub:'seion', pick:() => TB.seion.flat() },
+    { id:'dakuten', label:'With marks', sub:'dakuten ゛゜', pick:() => TB.dakuten.flat() },
+    { id:'youon', label:'Combined', sub: kata ? 'youon キャ・シャ…' : 'youon きゃ・しゃ…', pick:() => TB.youon.flat() },
+  ];
+  if (TB.foreign) SCOPES.push({ id:'foreign', label:'Foreign sounds', sub:'ファ・ティ・ヴ…', pick:() => TB.foreign.flat() });
+  SCOPES.push({ id:'weak', label:'My weak spots', sub:'what you keep missing', pick:() => null });
+  document.getElementById('scopeList').innerHTML = SCOPES.map(s =>
+    '<button class="glass" data-s="' + s.id + '">' + s.label + '<small>' + s.sub + '</small></button>').join('');
+}
 let Q = { list:[], i:0, score:0, item:null, tries:0, type:'' };
 
-document.getElementById('scopeList').innerHTML = SCOPES.map(s =>
-  '<button class="glass" data-s="' + s.id + '">' + s.label + '<small>' + s.sub + '</small></button>').join('');
 document.getElementById('scopeList').addEventListener('click', e => {
   const b = e.target.closest('button[data-s]');
   if (b) startQuiz(b.dataset.s);
@@ -842,7 +920,7 @@ function poolFor(id){
     const scored = ORDER.filter(k => !NO_QUIZ.has(k) && ST.quiz[k]);
     scored.sort((a,b) => (ST.quiz[b].x||0) - (ST.quiz[a].x||0));
     keys = scored.filter(k => (ST.quiz[k].x||0) > 0).slice(0, 20);
-    if (keys.length < 4) keys = SEION_ROWS.flat().filter(Boolean).map(s => s.split('|')[0]);
+    if (keys.length < 4) keys = TB.seion.flat().filter(Boolean).map(s => s.split('|')[0]);
   } else {
     keys = sc.pick().filter(Boolean).map(s => s.split('|')[0]);
   }
@@ -972,10 +1050,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') move(1);
 });
 
-if (!window.KANA_STROKES || !window.KANA_TABLES) document.getElementById('errBanner').style.display = 'block';
+if (!window.KANA_STROKES || !window.KANA_TABLES || !window.KATAKANA_TABLES) document.getElementById('errBanner').style.display = 'block';
 syncMute();
 if (ST.slow) document.getElementById('btnSlow').classList.add('on');
-buildChart();
+const qs = new URLSearchParams(location.search);
+setScript(qs.has('kata') ? 'kata' : qs.has('hira') ? 'hira' : ST.script);   // ?kata links straight to katakana
 if (location.hash){
   const k = decodeURIComponent(location.hash.slice(1));
   if (ITEMS[k]) openCard(k);
