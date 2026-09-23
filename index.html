@@ -859,7 +859,6 @@ window.addEventListener('resize', () => { if (tr.active) sizeCanvas(); });
 
 /* ================= quiz ================= */
 const SCOPES = [
-  { id:'first', label:'a – no', sub:'first 25 characters', pick:() => SEION_ROWS.slice(0,5).flat() },
   { id:'seion', label:'All 46 basic', sub:'seion', pick:() => SEION_ROWS.flat() },
   { id:'dakuten', label:'With marks', sub:'dakuten ゛゜', pick:() => DAKUTEN_ROWS.flat() },
   { id:'youon', label:'Combined', sub:'youon きゃ・しゃ…', pick:() => YOUON_ROWS.flat() },
