@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Learn to read and write hiragana: full gojuon chart, animated stroke order, tracing practice and quizzes. ひらがなくん — 書き順アニメ付きのひらがな学習サイト。">
+<title>ひらがなくん | Hiragana-kun</title>
+<meta name="theme-color" content="#0e1020">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>あ</text></svg>">
+<meta property="og:title" content="ひらがなくん | Hiragana-kun">
+<meta property="og:description" content="Learn to read and write hiragana — animated stroke order, tracing practice and quizzes.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<style>:root{
+  --bg:#0e1020; --panel:rgba(255,255,255,.055); --panel2:rgba(255,255,255,.085);
+  --edge:rgba(255,255,255,.1); --edge2:rgba(255,255,255,.2);
+  --ink:#eceaf6; --sub:#8b87a8; --pink:#ff5f9e; --aqua:#5ce6d5; --ng:#ff6b6b;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{
+  min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Hiragino Sans","Yu Gothic",Meiryo,-apple-system,sans-serif;
+  overscroll-behavior-y:none;position:relative;overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(560px 340px at 10% -6%, rgba(255,95,158,.20), transparent 70%),
+    radial-gradient(560px 360px at 94% 16%, rgba(92,230,213,.15), transparent 70%),
+    radial-gradient(700px 500px at 50% 108%, rgba(120,110,255,.13), transparent 70%);
+}
+/* manipulation: quick repeat taps (› › ›, ▶ ▶) must click, not trigger double-tap zoom on iOS */
+button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none;touch-action:manipulation}
+.en{font-family:Outfit,"Hiragino Sans",sans-serif}
+.glass{background:var(--panel);border:1px solid var(--edge);border-radius:14px}
+.glass:active{background:var(--panel2)}
+
+/* ---------- header ---------- */
+header{
+  display:flex;align-items:center;gap:10px;justify-content:space-between;
+  padding:22px 18px 6px;max-width:640px;margin:0 auto;
+}
+h1{font-size:21px;font-weight:500;letter-spacing:.04em;line-height:1.25}
+h1 small{
+  display:block;font-family:Outfit,sans-serif;font-size:9.5px;font-weight:300;
+  letter-spacing:.34em;color:var(--sub);margin-top:5px;
+}
+.hud{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#score{
+  font-family:Outfit,sans-serif;font-size:12px;letter-spacing:.12em;color:var(--sub);
+  border:1px solid var(--edge);border-radius:999px;padding:8px 13px;white-space:nowrap;
+}
+#score b{color:var(--aqua);font-weight:700}
+#muteBtn{width:42px;height:38px;font-size:16px;border-radius:12px}
+
+/* ---------- tabs ---------- */
+nav{display:flex;gap:8px;max-width:640px;margin:10px auto 0;padding:0 18px}
+nav button{
+  flex:1;padding:12px 4px;font-family:Outfit,sans-serif;font-size:12.5px;font-weight:500;
+  letter-spacing:.16em;color:var(--sub);border-radius:12px;
+}
+body[data-mode="chart"] #tabChart,
+body[data-mode="quiz"] #tabQuiz{
+  color:#0e1020;font-weight:700;border-color:transparent;
+  background:linear-gradient(120deg,#ff7fb0,#ff5f9e);box-shadow:0 0 26px rgba(255,95,158,.4);
+}
+main{max-width:640px;margin:0 auto;padding:20px 18px 40px}
+body[data-mode="chart"] #quizPane,
+body[data-mode="quiz"] #chartPane{display:none}
+
+/* ---------- chart ---------- */
+.lead{font-size:13.5px;color:var(--sub);text-align:center;line-height:1.85;margin-bottom:20px}
+.lead b{color:var(--aqua);font-weight:500}
+h2{font-size:13px;font-weight:500;margin:26px 0 12px;display:flex;align-items:center;gap:10px;
+   font-family:Outfit,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge2),transparent)}
+h2 span{font-size:10.5px;color:var(--sub);letter-spacing:.1em;text-transform:none;font-family:"Hiragino Sans",sans-serif}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.grid.youon{grid-template-columns:repeat(3,1fr)}
+.grid.small{grid-template-columns:repeat(4,1fr)}
+.cell{
+  position:relative;aspect-ratio:1;background:var(--panel);border:1px solid var(--edge);
+  border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  transition:transform .12s, box-shadow .2s;
+}
+.cell:active{transform:scale(.95)}
+.cell .k{font-size:clamp(21px,6.2vw,30px);line-height:1.05}
+.cell.combo .k{font-size:clamp(17px,5vw,25px)}
+.cell .r{font-family:Outfit,sans-serif;font-size:clamp(8.5px,2.3vw,10.5px);color:var(--sub);letter-spacing:.12em}
+.cell.done{border-color:rgba(92,230,213,.45);box-shadow:inset 0 0 18px rgba(92,230,213,.13)}
+.cell.done .k{color:var(--aqua);text-shadow:0 0 14px rgba(92,230,213,.5)}
+.cell.done .r{color:rgba(92,230,213,.6)}
+.cell.rare::after{content:"rare";position:absolute;top:5px;right:6px;font-family:Outfit,sans-serif;font-size:7.5px;letter-spacing:.06em;color:var(--sub);opacity:.8}
+.gap{aspect-ratio:1;border:1px dashed rgba(255,255,255,.07);border-radius:14px}
+
+/* ---------- badges ---------- */
+#badges{margin-top:30px;border:1px solid var(--edge);border-radius:18px;padding:16px;background:rgba(255,255,255,.03)}
+#badges h3{font-size:12px;font-family:Outfit,sans-serif;letter-spacing:.18em;color:var(--sub);margin-bottom:12px;text-transform:uppercase}
+#badgeList{display:flex;flex-wrap:wrap;gap:8px}
+.badge{
+  border:1px solid rgba(92,230,213,.45);border-radius:999px;padding:7px 13px;font-size:12px;
+  display:flex;align-items:center;gap:6px;color:var(--aqua);background:rgba(92,230,213,.07);
+  box-shadow:0 0 18px rgba(92,230,213,.15);
+}
+.badge.locked{border-color:var(--edge);color:var(--sub);background:none;box-shadow:none;opacity:.5}
+
+/* ---------- character card ---------- */
+#card{
+  position:fixed;inset:0;z-index:20;background:#0e1020;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.9,.3,1);
+  overflow-y:auto;overscroll-behavior:contain;
+  padding:10px 18px calc(28px + env(safe-area-inset-bottom));
+}
+#card::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(520px 360px at 50% 4%, rgba(92,230,213,.16), transparent 72%),
+    radial-gradient(520px 420px at 50% 100%, rgba(255,95,158,.14), transparent 72%);
+}
+body.card-open #card{transform:translateY(0)}
+@media(min-width:720px){
+  #card{inset:auto;left:50%;top:50%;width:500px;max-height:92vh;border-radius:24px;
+        border:1px solid var(--edge);transform:translate(-50%,120%);
+        box-shadow:0 30px 80px rgba(0,0,0,.6);}
+  body.card-open #card{transform:translate(-50%,-50%)}
+  #backdrop{position:fixed;inset:0;z-index:19;background:rgba(6,7,16,.72);opacity:0;pointer-events:none;transition:opacity .25s}
+  body.card-open #backdrop{opacity:1;pointer-events:auto}
+}
+@media(max-width:719px){ #backdrop{display:none} }
+#cardTop{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  position:sticky;top:-10px;z-index:3;background:rgba(14,16,32,.92);backdrop-filter:blur(8px);
+  padding:calc(12px + env(safe-area-inset-top)) 0 10px;margin:-10px 0 0;
+}
+#cardTop button{width:44px;height:44px;font-size:16px;color:var(--sub);border-radius:12px;flex-shrink:0}
+#cardTitle{text-align:center;line-height:1.2;flex:1}
+#cardTitle .k{font-size:24px}
+#cardTitle .r{font-family:Outfit,sans-serif;font-size:11px;letter-spacing:.3em;color:var(--pink);
+              font-weight:700;margin-top:4px;text-transform:uppercase}
+
+#glyphBox{
+  position:relative;width:min(76vw,290px);aspect-ratio:1;margin:6px auto 16px;
+  border:1px solid var(--edge);border-radius:20px;overflow:hidden;
+  background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.055), rgba(255,255,255,.012));
+}
+#glyphBox.wide{width:min(92vw,420px);aspect-ratio:2/1}
+#glyphSvg{display:block;width:100%;height:100%}
+#glyphSvg .guide{stroke:rgba(255,255,255,.16);stroke-width:.6;stroke-dasharray:2 6;fill:none}
+#glyphSvg .st{
+  fill:none;stroke:#fff;stroke-width:5.6;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 5px rgba(92,230,213,.85)) drop-shadow(0 0 15px rgba(92,230,213,.45));
+}
+#glyphSvg .num{font-family:Outfit,sans-serif;font-size:8px;fill:var(--pink);font-weight:700;opacity:0;transition:opacity .2s}
+#glyphSvg .num.on{opacity:1}
+#glyphSvg .st.ghost{stroke:rgba(255,255,255,.08);filter:none}
+#glyphSvg .st.next{stroke:rgba(255,255,255,.2);filter:none}
+#glyphSvg .st.pop{animation:stpop .3s ease-out}
+@keyframes stpop{0%{stroke:var(--aqua);stroke-width:9}100%{stroke:#fff;stroke-width:5.6}}
+#startDot{fill:var(--aqua);opacity:0;filter:drop-shadow(0 0 6px rgba(92,230,213,.9))}
+#startDot.on{opacity:1;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{r:4;opacity:.95}50%{r:6.5;opacity:.45}}
+#inkCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:none}
+body[data-cmode="trace"] #inkCanvas{display:block}
+#glyphBox.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+
+#seg{display:flex;gap:8px;margin:0 auto 14px;max-width:290px}
+#seg button{flex:1;padding:11px 4px;font-family:Outfit,sans-serif;font-size:12.5px;
+            letter-spacing:.14em;color:var(--sub);border-radius:12px}
+body[data-cmode="watch"] #segWatch, body[data-cmode="trace"] #segTrace{
+  color:#0e1020;font-weight:700;border-color:transparent;
+  background:linear-gradient(120deg,#7ff0e2,#5ce6d5);box-shadow:0 0 24px rgba(92,230,213,.35);
+}
+/* block, not flex: inline <b> and <br> inside the message must stay inline */
+#cardMsg{
+  text-align:center;font-size:14px;min-height:44px;line-height:1.6;margin-bottom:12px;color:var(--sub);
+  display:block;padding:6px 4px;
+}
+#cardMsg b{color:var(--ink);font-weight:500}
+#cardMsg.ok b{color:var(--aqua);text-shadow:0 0 16px rgba(92,230,213,.5)}
+#cardMsg.ng b{color:var(--pink)}
+.ctrl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.ctrl button{
+  padding:10px 14px;font-family:Outfit,sans-serif;font-size:12px;letter-spacing:.12em;
+  color:var(--sub);border-radius:11px;min-width:46px;
+}
+.ctrl button.on{color:#0e1020;background:var(--aqua);border-color:transparent;font-weight:700}
+.ctrl button[disabled]{opacity:.35}
+body[data-cmode="trace"] #watchCtrl{display:none}
+body[data-cmode="watch"] #traceCtrl{display:none}
+#sayBtn{
+  width:100%;margin-bottom:16px;padding:14px;font-family:Outfit,sans-serif;font-size:12.5px;
+  letter-spacing:.2em;border-color:rgba(255,95,158,.45);background:rgba(255,95,158,.1);border-radius:14px;
+}
+#sayBtn[disabled]{opacity:.4;border-color:var(--edge);background:none}
+#wordBox{padding-top:16px;border-top:1px solid var(--edge);text-align:center;line-height:1.6}
+#wordBox .w{font-size:22px}
+#wordBox .wr{font-family:Outfit,sans-serif;font-size:11px;letter-spacing:.22em;color:var(--pink);margin:6px 0 3px;text-transform:uppercase}
+#wordBox .we{font-size:13px;color:var(--sub)}
+#wordBox .note{font-size:12.5px;color:var(--sub);margin-top:10px;line-height:1.7}
+#wordBox .parts{font-size:12.5px;color:var(--sub);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+#wordBox .parts button{border:1px solid var(--edge);border-radius:10px;padding:5px 12px;font-size:17px;color:var(--ink)}
+
+/* ---------- quiz ---------- */
+#quizStart{text-align:center}
+#quizStart .scopes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin:16px 0}
+#quizStart .scopes button{padding:16px 10px;font-size:14px;border-radius:14px;line-height:1.5;text-align:left}
+#quizStart .scopes small{display:block;font-family:Outfit,sans-serif;font-size:10.5px;color:var(--sub);letter-spacing:.1em;margin-top:4px}
+#quizPlay{display:none}
+body.quiz-on #quizStart{display:none}
+body.quiz-on #quizPlay{display:block}
+#quizBar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;
+         font-family:Outfit,sans-serif;font-size:12px;letter-spacing:.14em;color:var(--sub)}
+#quizScore b{color:var(--aqua)}
+#quizBar button{padding:8px 13px;font-size:11px;letter-spacing:.14em;border-radius:10px;font-family:Outfit,sans-serif}
+#quizQ{
+  border:1px solid var(--edge);border-radius:20px;min-height:140px;margin-bottom:10px;padding:20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;
+  background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.05), rgba(255,255,255,.012));
+  transition:border-color .2s, box-shadow .2s;
+}
+#quizQ .big{font-size:clamp(46px,16vw,74px);line-height:1.1;text-shadow:0 0 30px rgba(92,230,213,.35)}
+#quizQ .rj{font-family:Outfit,sans-serif;font-size:clamp(32px,10vw,50px);font-weight:700;
+           color:var(--pink);letter-spacing:.06em;text-shadow:0 0 30px rgba(255,95,158,.45)}
+#quizQ .hint{font-size:12px;color:var(--sub);letter-spacing:.06em}
+#quizQ button.audio{font-size:40px;border:none;background:none}
+#quizQ.flash-ok{border-color:rgba(92,230,213,.6);box-shadow:0 0 34px rgba(92,230,213,.22) inset}
+#quizQ.flash-ng{border-color:rgba(255,95,158,.6);box-shadow:0 0 34px rgba(255,95,158,.2) inset}
+#quizMsg{text-align:center;font-size:13.5px;min-height:26px;margin-bottom:12px;color:var(--sub)}
+#quizMsg.ok{color:var(--aqua)} #quizMsg.ng{color:var(--pink)}
+#quizChoices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+#quizChoices button{padding:18px 6px;font-size:clamp(21px,6vw,27px);border-radius:14px}
+#quizChoices button.rj{font-family:Outfit,sans-serif;font-size:clamp(16px,4.6vw,21px);font-weight:500;letter-spacing:.1em}
+#quizChoices button.wrong{opacity:.28}
+#quizChoices button.right{color:#0e1020;background:var(--aqua);border-color:transparent;font-weight:700;
+                          box-shadow:0 0 30px rgba(92,230,213,.4)}
+#quizEnd{display:none;text-align:center}
+body.quiz-done #quizPlay{display:none}
+body.quiz-done #quizEnd{display:block}
+#quizEnd .big{font-size:50px;margin:14px 0}
+#quizEnd .sc{font-family:Outfit,sans-serif;font-size:19px;letter-spacing:.1em;margin-bottom:8px}
+#quizEnd button{padding:14px 22px;font-size:13px;border-radius:14px;margin:14px 5px 0;
+                font-family:Outfit,sans-serif;letter-spacing:.12em}
+
+footer{
+  max-width:640px;margin:0 auto;padding:24px 18px calc(30px + env(safe-area-inset-bottom));
+  font-family:Outfit,sans-serif;font-size:10.5px;color:var(--sub);text-align:center;line-height:2;letter-spacing:.06em;
+}
+footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid rgba(92,230,213,.3)}
+#errBanner{
+  display:none;border:1px solid rgba(255,107,107,.5);background:rgba(255,107,107,.08);border-radius:14px;
+  padding:14px;margin:12px 18px;font-size:13px;color:#ffb3b3;text-align:center;
+}
+</style>
+</head>
+<body data-mode="chart" data-cmode="watch">
+
+<header>
+  <h1>ひらがなくん<small>HIRAGANA-KUN</small></h1>
+  <div class="hud">
+    <div id="score" class="glass"><b>0</b> / 108</div>
+    <button id="muteBtn" class="glass" title="Sound on/off">🔊</button>
+  </div>
+</header>
+
+<nav>
+  <button id="tabChart" class="glass">CHART</button>
+  <button id="tabQuiz" class="glass">QUIZ</button>
+</nav>
+
+<div id="errBanner">Could not load <b>stroke-data.js</b>. Keep it next to index.html.</div>
+
+<main>
+  <section id="chartPane">
+    <p class="lead">Tap any character to see <b>how to write it</b>, hear it, and trace it.<br>
+      Hiragana is the first alphabet of Japanese — 46 basic sounds.</p>
+
+    <h2>Basic 46 <span>seion &middot; the ones to learn first</span></h2>
+    <div class="grid" id="gridSeion"></div>
+
+    <h2>With marks <span>dakuten &amp; handakuten &middot; ゛ ゜</span></h2>
+    <div class="grid" id="gridDakuten"></div>
+
+    <h2>Small kana <span>they change the sound</span></h2>
+    <div class="grid small" id="gridSmall"></div>
+
+    <h2>Combined sounds <span>youon &middot; big + small kana</span></h2>
+    <div class="grid youon" id="gridYouon"></div>
+
+    <div id="badges">
+      <h3>🏅 Stickers</h3>
+      <div id="badgeList"></div>
+    </div>
+  </section>
+
+  <section id="quizPane">
+    <div id="quizStart">
+      <p class="lead">Pick what to practise. <b>10 questions</b> each round.</p>
+      <div class="scopes" id="scopeList"></div>
+    </div>
+
+    <div id="quizPlay">
+      <div id="quizBar">
+        <span id="quizProgress">1 / 10</span>
+        <span id="quizScore"><b>0</b> / 10</span>
+        <button id="quizQuit" class="glass">STOP</button>
+      </div>
+      <div id="quizQ"></div>
+      <div id="quizMsg"></div>
+      <div id="quizChoices"></div>
+    </div>
+
+    <div id="quizEnd">
+      <div class="big" id="endFace">🌸</div>
+      <div class="sc" id="endScore"></div>
+      <div id="endMsg" class="lead"></div>
+      <button id="quizAgain" class="glass">PLAY AGAIN</button>
+      <button id="quizBack" class="glass">CHART</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Stroke order data from <a href="https://kanjivg.tagaini.net" target="_blank" rel="noopener">KanjiVG</a>
+  &copy; Ulrich Apel, <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a>.
+  <br>Made for beginners by <a href="https://nihongowithyuya.com" target="_blank" rel="noopener">Nihongo with Yuya</a> 🌸
+</footer>
+
+<div id="backdrop"></div>
+
+<div id="card">
+  <div id="cardTop">
+    <button id="cardClose" class="glass">✕</button>
+    <div id="cardTitle"></div>
+    <button id="cardPrev" class="glass">‹</button>
+    <button id="cardNext" class="glass">›</button>
+  </div>
+
+  <div id="glyphBox">
+    <svg id="glyphSvg" viewBox="0 0 109 109"></svg>
+    <canvas id="inkCanvas"></canvas>
+  </div>
+
+  <div id="seg">
+    <button id="segWatch" class="glass">WATCH</button>
+    <button id="segTrace" class="glass">TRACE</button>
+  </div>
+
+  <div id="cardMsg"></div>
+
+  <div class="ctrl" id="watchCtrl">
+    <button id="btnReplay" class="glass">REPLAY</button>
+    <button id="btnPrevStroke" class="glass">◀</button>
+    <button id="btnNextStroke" class="glass">▶</button>
+    <button id="btnSlow" class="glass">SLOW</button>
+  </div>
+  <div class="ctrl" id="traceCtrl">
+    <button id="btnReset" class="glass">START OVER</button>
+    <button id="btnShow" class="glass">SHOW ME</button>
+  </div>
+
+  <button id="sayBtn" class="glass">LISTEN</button>
+  <div id="wordBox"></div>
+</div>
+
+<script src="kana-data.js"></script>
+<script src="stroke-data.js"></script>
+<script src="audio/manifest.js"></script>
+<script>
+"use strict";
+
+/* ================= kana tables (kana-data.js) ================= */
+const _T = window.KANA_TABLES || { seion:[], dakuten:[], small:[], youon:[] };
+const SEION_ROWS = _T.seion, DAKUTEN_ROWS = _T.dakuten, SMALL_ROW = _T.small, YOUON_ROWS = _T.youon;
+
+/* characters excluded from quiz answers (duplicate sounds / not really used alone) */
+const NO_QUIZ = new Set(['ぢ','づ','っ','ゃ','ゅ','ょ','を','みゅ','ぴゅ','ひゅ','びゅ']);
+
+/* look-alike distractors — the mistakes beginners actually make */
+const CONFUSE = [
+  ['ぬ','め','ね','れ'],['は','ほ','ま','ま'],['れ','わ','ね'],['さ','き','ち'],['る','ろ'],
+  ['い','り'],['す','む'],['こ','に'],['し','つ'],['そ','ち'],['せ','さ'],['ん','そ'],
+  ['あ','お'],['た','な'],['け','は'],['ら','う'],['ふ','ゐ'],['よ','ま'],
+];
+
+/* ================= build item index ================= */
+const ITEMS = {};      // kana -> {k,r,w,wr,we,note,grp,row}
+const ORDER = [];      // navigation order
+function parse(s, grp, row){
+  if (!s) return null;
+  const p = s.split('|');
+  const it = { k:p[0], r:p[1], w:p[2]||'', wr:p[3]||'', we:p[4]||'', note:p[5]||'', grp, row };
+  ITEMS[it.k] = it; ORDER.push(it.k);
+  return it;
+}
+SEION_ROWS.forEach((row,i) => row.forEach(s => parse(s, 'seion', i)));
+DAKUTEN_ROWS.forEach((row,i) => row.forEach(s => parse(s, 'dakuten', i)));
+SMALL_ROW.forEach(s => parse(s, 'small', 0));
+YOUON_ROWS.forEach((row,i) => row.forEach(s => parse(s, 'youon', i)));
+
+/* ================= storage ================= */
+const KEY = 'hiragana-kun.v1';
+let ST = { v:1, traced:{}, quiz:{}, badges:[], muted:false, slow:false };
+try {
+  const raw = localStorage.getItem(KEY);
+  if (raw) ST = Object.assign(ST, JSON.parse(raw));
+} catch(e){}
+let saveTimer = null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch(e){} }, 250);
+}
+function isLearned(k){
+  const q = ST.quiz[k];
+  return (ST.traced[k] || 0) >= 1 || (q && q.c >= 3);
+}
+function learnedCount(){ return ORDER.filter(isLearned).length; }
+
+/* ================= sound =================
+   Recorded voice only — audio/<codepoints>.m4a, listed in audio/manifest.js.
+   No speech synthesis: a robot reading single kana teaches the wrong sound. */
+let audioCtx = null, curAudio = null;
+const audioCache = {};
+function audioKey(kana){
+  return Array.from(kana).map(c => c.codePointAt(0).toString(16)).join('-');
+}
+function hasAudio(kana){ return !!(window.KANA_AUDIO && window.KANA_AUDIO[audioKey(kana)]); }
+function speak(kana){
+  if (ST.muted || !hasAudio(kana)) return;
+  const key = audioKey(kana);
+  let a = audioCache[key];
+  if (!a){ a = audioCache[key] = new Audio('audio/' + key + '.m4a'); a.preload = 'auto'; }
+  try {
+    if (curAudio && curAudio !== a){ curAudio.pause(); curAudio.currentTime = 0; }
+    a.currentTime = 0;
+    const pr = a.play(); if (pr && pr.catch) pr.catch(() => {});
+    curAudio = a;
+  } catch(e){}
+}
+function blip(freq, dur){
+  if (ST.muted) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(.16, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch(e){}
+}
+
+/* ================= chart ================= */
+function cellHTML(it){
+  if (!it) return '<div class="gap"></div>';
+  const rare = it.note.startsWith('Rare') || it.note.startsWith('Very rare');
+  return '<button class="cell' + (it.k.length > 1 ? ' combo' : '') + (rare ? ' rare' : '') +
+    (isLearned(it.k) ? ' done' : '') + '" data-k="' + it.k + '">' +
+    '<span class="k">' + it.k + '</span><span class="r">' + it.r + '</span></button>';
+}
+function buildChart(){
+  const mk = (rows, el) => {
+    el.innerHTML = rows.map(row => (Array.isArray(row) ? row : [row])
+      .map(s => cellHTML(s ? ITEMS[s.split('|')[0]] : null)).join('')).join('');
+  };
+  mk(SEION_ROWS, document.getElementById('gridSeion'));
+  mk(DAKUTEN_ROWS, document.getElementById('gridDakuten'));
+  mk([SMALL_ROW], document.getElementById('gridSmall'));
+  mk(YOUON_ROWS, document.getElementById('gridYouon'));
+  document.getElementById('score').innerHTML = '<b>' + learnedCount() + '</b> / ' + ORDER.length;
+  buildBadges();
+}
+document.querySelectorAll('.grid').forEach(g => {
+  g.addEventListener('click', e => {
+    const b = e.target.closest('.cell');
+    if (b) openCard(b.dataset.k);
+  });
+});
+
+/* ================= badges ================= */
+const ROW_NAMES = ['a','ka','sa','ta','na','ha','ma','ya','ra','wa','n'];
+function badgeDefs(){
+  const defs = SEION_ROWS.map((row, i) => ({
+    id: 'row' + i, icon: '🌸', label: ROW_NAMES[i] + '-row',
+    done: row.filter(Boolean).every(s => isLearned(s.split('|')[0]))
+  }));
+  const allOf = rows => rows.flat().filter(Boolean).every(s => isLearned(s.split('|')[0]));
+  defs.push({ id:'dakuten', icon:'💧', label:'all dakuten', done: allOf(DAKUTEN_ROWS) });
+  defs.push({ id:'youon', icon:'🎵', label:'all youon', done: allOf(YOUON_ROWS) });
+  const traced = Object.keys(ST.traced).length;
+  defs.push({ id:'t10', icon:'✏️', label:'traced 10', done: traced >= 10 });
+  defs.push({ id:'t50', icon:'🖌️', label:'traced 50', done: traced >= 50 });
+  defs.push({ id:'perfect', icon:'🏆', label:'perfect quiz', done: ST.badges.indexOf('perfect') >= 0 });
+  defs.push({ id:'all46', icon:'👑', label:'all 46 basic', done: allOf(SEION_ROWS) });
+  return defs;
+}
+function buildBadges(){
+  document.getElementById('badgeList').innerHTML = badgeDefs().map(d =>
+    '<span class="badge' + (d.done ? '' : ' locked') + '">' + d.icon + ' ' + d.label + '</span>').join('');
+}
+
+/* ================= glyph rendering ================= */
+const SVGNS = 'http://www.w3.org/2000/svg';
+const svgEl = document.getElementById('glyphSvg');
+const glyphBox = document.getElementById('glyphBox');
+
+/* returns [{d, tf, num:[x,y]}] — youon combos place the small kana on the right */
+function strokesOf(kana){
+  const out = [];
+  const push = (ch, sc, dx, dy) => {
+    const g = window.KANA_STROKES[ch];
+    if (!g) return;
+    g.s.forEach((d, i) => {
+      const n = g.n[i] || [0,0];
+      out.push({ d, sc, dx, dy, num:[n[0]*sc + dx, n[1]*sc + dy] });
+    });
+  };
+  // KanjiVG already draws ゃゅょ small inside their own box, so no extra scaling
+  if (kana.length === 1) push(kana, 1, 0, 0);
+  else { push(kana[0], 1, 0, 0); push(kana[1], .85, 117, 16); }
+  return out;
+}
+function renderGlyph(kana){
+  const wide = kana.length > 1;
+  glyphBox.classList.toggle('wide', wide);
+  svgEl.setAttribute('viewBox', wide ? '0 0 218 109' : '0 0 109 109');
+  const W = wide ? 218 : 109;
+  let html = '<g class="guide">' +
+    '<line x1="' + W/2 + '" y1="4" x2="' + W/2 + '" y2="105"/>' +
+    '<line x1="4" y1="54.5" x2="' + (W-4) + '" y2="54.5"/>' +
+    (wide ? '<line x1="109" y1="4" x2="109" y2="105"/>' : '') + '</g>';
+  const sts = strokesOf(kana);
+  sts.forEach((s, i) => {
+    html += '<path class="st" id="st' + i + '" d="' + s.d + '" transform="translate(' +
+      s.dx + ',' + s.dy + ') scale(' + s.sc + ')"/>';
+  });
+  sts.forEach((s, i) => {
+    html += '<text class="num" id="num' + i + '" x="' + s.num[0] + '" y="' + s.num[1] + '">' + (i+1) + '</text>';
+  });
+  html += '<circle id="startDot" cx="0" cy="0" r="4"/>';
+  svgEl.innerHTML = html;
+  return sts.length;
+}
+function paths(){ return Array.prototype.slice.call(svgEl.querySelectorAll('.st')); }
+function numEl(i){ return svgEl.querySelector('#num' + i); }
+
+/* ================= watch mode ================= */
+let anim = { running:false, i:0, timer:null, handle:null, total:0 };
+function stopAnim(){
+  anim.running = false;
+  clearTimeout(anim.timer);
+  if (anim.handle){ try { anim.handle.cancel(); } catch(e){} anim.handle = null; }
+}
+function setStatic(upTo){          // strokes 0..upTo-1 visible, rest faded
+  paths().forEach((p, i) => {
+    p.style.strokeDasharray = ''; p.style.strokeDashoffset = '';
+    p.classList.toggle('ghost', i >= upTo);
+    const n = numEl(i); if (n) n.classList.toggle('on', i < upTo);
+  });
+}
+function animateStroke(i, then){
+  const p = paths()[i];
+  if (!p) return;
+  const len = p.getTotalLength();
+  p.classList.remove('ghost');
+  p.style.strokeDasharray = len + ' ' + len;
+  p.style.strokeDashoffset = len;
+  const n = numEl(i); if (n) n.classList.add('on');
+  const dur = Math.min(1100, Math.max(350, len * 8)) * (ST.slow ? 2 : 1);
+  anim.handle = p.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+    { duration: dur, easing: 'ease-in-out', fill: 'forwards' });
+  anim.handle.onfinish = () => {
+    p.style.strokeDashoffset = '0';
+    if (then) then();
+  };
+}
+function playAll(from){
+  stopAnim();
+  anim.running = true; anim.i = from || 0;
+  setStatic(anim.i);
+  const step = () => {
+    if (!anim.running || anim.i >= anim.total){ anim.running = false; return; }
+    const at = anim.i;
+    animateStroke(at, () => {
+      anim.i = at + 1;
+      if (anim.i >= anim.total){ anim.running = false; return; }
+      anim.timer = setTimeout(step, 180 * (ST.slow ? 2 : 1));
+    });
+  };
+  step();
+}
+
+/* ================= trace mode ================= */
+const canvas = document.getElementById('inkCanvas');
+const ctx = canvas.getContext('2d');
+let tr = { samples:[], idx:0, drawing:false, cursor:0, stray:0, ink:[], fails:0, active:false, W:109 };
+
+function sampleStroke(p){
+  const len = p.getTotalLength();
+  const n = Math.min(60, Math.max(8, Math.round(len / 3)));
+  const pts = [];
+  for (let i = 0; i <= n; i++){
+    const pt = p.getPointAtLength(len * i / n);
+    pts.push([pt.x, pt.y]);
+  }
+  return pts;
+}
+function toLocal(pt, s){ return [pt[0] * s.sc + s.dx, pt[1] * s.sc + s.dy]; }
+
+function sizeCanvas(){
+  const r = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(r.width * dpr);
+  canvas.height = Math.round(r.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function vbScale(){                       // canvas CSS px per viewBox unit
+  const r = canvas.getBoundingClientRect();
+  return r.width / tr.W;
+}
+function startTrace(){
+  const sts = strokesOf(current);
+  tr.W = current.length > 1 ? 218 : 109;
+  tr.samples = paths().map((p, i) => sampleStroke(p).map(pt => toLocal(pt, sts[i])));
+  tr.idx = 0; tr.fails = 0; tr.active = true;
+  sizeCanvas();
+  nextStroke();
+}
+function nextStroke(){
+  tr.cursor = 0; tr.stray = 0; tr.ink = []; tr.drawing = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (tr.idx >= tr.samples.length){ finishTrace(); return; }
+  paths().forEach((p, i) => {
+    p.classList.remove('ghost','next','pop');
+    p.style.strokeDasharray = ''; p.style.strokeDashoffset = '';
+    if (i > tr.idx) p.classList.add('ghost');
+    else if (i === tr.idx) p.classList.add('next');
+    const n = numEl(i); if (n) n.classList.toggle('on', i <= tr.idx);
+  });
+  const dot = svgEl.querySelector('#startDot');
+  const s0 = tr.samples[tr.idx][0];
+  dot.setAttribute('cx', s0[0]); dot.setAttribute('cy', s0[1]);
+  dot.classList.add('on');
+  setCardMsg('Stroke <b>' + (tr.idx + 1) + '</b> of ' + tr.samples.length + ' — start at the green dot.');
+}
+function finishTrace(){
+  svgEl.querySelector('#startDot').classList.remove('on');
+  paths().forEach((p, i) => { p.classList.remove('ghost','next'); const n = numEl(i); if (n) n.classList.add('on'); });
+  tr.active = false;
+  ST.traced[current] = (ST.traced[current] || 0) + 1;
+  save(); buildChart(); updateCardStar();
+  setCardMsg('<b>You wrote ' + current + '! 🎉</b><br>Nice writing — try the next one.', 'ok');
+  blip(880, .12); setTimeout(() => blip(1320, .18), 120);
+  setTimeout(() => speak(current), 260);
+}
+function dist(a, b){ const dx = a[0]-b[0], dy = a[1]-b[1]; return Math.sqrt(dx*dx + dy*dy); }
+function evtPoint(e){
+  const r = canvas.getBoundingClientRect();
+  return [ (e.clientX - r.left) / r.width * tr.W, (e.clientY - r.top) / r.width * tr.W ];
+}
+function drawInk(){
+  const s = vbScale();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (tr.ink.length < 2) return;
+  ctx.lineWidth = 6 * s; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#ff5f9e';
+  ctx.shadowColor = 'rgba(255,95,158,.9)'; ctx.shadowBlur = 10 * s;
+  ctx.beginPath();
+  ctx.moveTo(tr.ink[0][0] * s, tr.ink[0][1] * s);
+  for (let i = 1; i < tr.ink.length; i++) ctx.lineTo(tr.ink[i][0] * s, tr.ink[i][1] * s);
+  ctx.stroke();
+}
+canvas.addEventListener('pointerdown', e => {
+  if (!tr.active) return;
+  e.preventDefault();
+  const p = evtPoint(e), target = tr.samples[tr.idx];
+  if (dist(p, target[0]) > 14){
+    glyphBox.classList.remove('shake'); void glyphBox.offsetWidth; glyphBox.classList.add('shake');
+    setCardMsg('<b>Start here!</b> 👉 Begin at the green dot.', 'ng');
+    blip(220, .12);
+    return;
+  }
+  canvas.setPointerCapture(e.pointerId);
+  tr.drawing = true; tr.cursor = 0; tr.stray = 0; tr.ink = [p];
+  drawInk();
+});
+canvas.addEventListener('pointermove', e => {
+  if (!tr.drawing) return;
+  e.preventDefault();
+  const p = evtPoint(e), target = tr.samples[tr.idx];
+  tr.ink.push(p);
+  let best = -1;
+  for (let i = tr.cursor; i <= Math.min(target.length - 1, tr.cursor + 6); i++){
+    if (dist(p, target[i]) <= 16) best = i;
+  }
+  if (best >= 0){ tr.cursor = best; tr.stray = 0; }
+  else tr.stray++;
+  drawInk();
+});
+function endStroke(e){
+  if (!tr.drawing) return;
+  tr.drawing = false;
+  const target = tr.samples[tr.idx];
+  const got = tr.cursor / (target.length - 1);
+  if (got >= 0.9 && tr.stray <= 4){
+    const p = paths()[tr.idx];
+    p.classList.remove('next','ghost'); p.classList.add('pop');
+    blip(660, .1);
+    tr.idx++;
+    setTimeout(nextStroke, 240);
+  } else {
+    tr.fails++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setCardMsg(tr.fails >= 3
+      ? '<b>Try again!</b> Tap 👀 Show me to watch this stroke.'
+      : '<b>Try again!</b> Follow the grey line all the way to the end.', 'ng');
+    blip(200, .15);
+    animateStroke(tr.idx, () => { paths()[tr.idx].classList.add('next'); });
+    setTimeout(() => { tr.cursor = 0; tr.stray = 0; tr.ink = []; }, 10);
+  }
+}
+canvas.addEventListener('pointerup', endStroke);
+canvas.addEventListener('pointercancel', endStroke);
+
+/* ================= card ================= */
+let current = null;
+const cardEl = document.getElementById('card');
+function setCardMsg(html, cls){
+  const m = document.getElementById('cardMsg');
+  m.innerHTML = html; m.className = cls || '';
+}
+function updateCardStar(){
+  document.getElementById('score').innerHTML = '<b>' + learnedCount() + '</b> / ' + ORDER.length;
+}
+function setMode(mode){
+  document.body.dataset.cmode = mode;
+  stopAnim();
+  tr.active = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  svgEl.querySelector('#startDot').classList.remove('on');
+  if (mode === 'watch'){
+    setCardMsg('Watch the stroke order, then tap <b>✏️ Trace</b> to write it yourself.');
+    playAll(0);
+  } else {
+    startTrace();
+  }
+}
+let pushedEntry = false;
+function openCard(kana, keepMode){
+  const it = ITEMS[kana];
+  if (!it) return;
+  const wasOpen = document.body.classList.contains('card-open');
+  current = kana;
+  document.body.classList.add('card-open');
+  const h = '#' + encodeURIComponent(kana);
+  if (location.hash !== h){
+    // moving between characters must not stack history entries, or ✕ walks back one by one
+    if (wasOpen) history.replaceState(null, '', h);
+    else { location.hash = encodeURIComponent(kana); pushedEntry = true; }
+  }
+  document.getElementById('card').scrollTop = 0;
+  document.getElementById('cardTitle').innerHTML =
+    '<div class="k">' + kana + '</div><div class="r">' + it.r + '</div>';
+  anim.total = renderGlyph(kana);
+  const canTrace = kana.length === 1;
+  document.getElementById('seg').style.display = canTrace ? '' : 'none';
+  let wb = '';
+  if (it.w) wb = '<div class="w">' + it.w + '</div><div class="wr">' + it.wr + '</div><div class="we">' + it.we + '</div>';
+  if (it.note) wb += '<div class="note">💡 ' + it.note + '</div>';
+  if (!canTrace) wb += '<div class="parts">Practise writing each part: ' +
+    '<button data-k="' + kana[0] + '">' + kana[0] + '</button>' +
+    '<button data-k="' + kana[1] + '">' + kana[1] + '</button></div>';
+  document.getElementById('wordBox').innerHTML = wb || '<div class="we">—</div>';
+  const sb = document.getElementById('sayBtn');
+  sb.disabled = !hasAudio(kana);
+  sb.textContent = sb.disabled ? 'RECORDING SOON' : 'LISTEN';
+  setMode(canTrace && keepMode === 'trace' ? 'trace' : 'watch');
+  if (!canTrace) setCardMsg('Two kana, one sound. Practise writing each part below.');
+}
+function closeCard(){
+  stopAnim(); tr.active = false;
+  document.body.classList.remove('card-open');
+  pushedEntry = false;
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+}
+function requestClose(){
+  if (pushedEntry) history.back();   // our own entry → hashchange → closeCard()
+  else closeCard();
+}
+document.getElementById('cardClose').addEventListener('click', requestClose);
+document.getElementById('backdrop').addEventListener('click', requestClose);
+function move(step){
+  const i = ORDER.indexOf(current);
+  const nxt = ORDER[(i + step + ORDER.length) % ORDER.length];
+  openCard(nxt, document.body.dataset.cmode);
+}
+document.getElementById('cardPrev').addEventListener('click', () => move(-1));
+document.getElementById('cardNext').addEventListener('click', () => move(1));
+document.getElementById('segWatch').addEventListener('click', () => setMode('watch'));
+document.getElementById('segTrace').addEventListener('click', () => setMode('trace'));
+document.getElementById('btnReplay').addEventListener('click', () => playAll(0));
+document.getElementById('btnPrevStroke').addEventListener('click', () => { stopAnim(); anim.i = Math.max(0, anim.i - 1); setStatic(anim.i); });
+document.getElementById('btnNextStroke').addEventListener('click', () => {
+  // tapped mid-stroke: finish that stroke and move on, instead of restarting it
+  // (restarting meant fast taps never got past the stroke being drawn)
+  if (anim.handle && anim.handle.playState === 'running'){ stopAnim(); anim.i++; setStatic(anim.i); return; }
+  stopAnim();
+  if (anim.i >= anim.total) anim.i = 0;
+  setStatic(anim.i);
+  animateStroke(anim.i, () => { anim.i++; });
+});
+document.getElementById('btnSlow').addEventListener('click', e => {
+  ST.slow = !ST.slow; save();
+  e.currentTarget.classList.toggle('on', ST.slow);
+  if (document.body.dataset.cmode === 'watch') playAll(0);
+});
+document.getElementById('btnReset').addEventListener('click', () => setMode('trace'));
+document.getElementById('btnShow').addEventListener('click', () => {
+  if (!tr.active) return;
+  const i = tr.idx;
+  animateStroke(i, () => paths()[i].classList.add('next'));
+});
+document.getElementById('sayBtn').addEventListener('click', () => speak(current));
+document.getElementById('wordBox').addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]');
+  if (b) openCard(b.dataset.k, 'trace');
+});
+window.addEventListener('hashchange', () => {
+  const k = decodeURIComponent(location.hash.slice(1));
+  if (!k) closeCard();
+  else if (ITEMS[k] && k !== current) openCard(k);
+  else if (!ITEMS[k]) closeCard();
+});
+window.addEventListener('resize', () => { if (tr.active) sizeCanvas(); });
+
+/* ================= quiz ================= */
+const SCOPES = [
+  { id:'first', label:'a – no', sub:'first 25 characters', pick:() => SEION_ROWS.slice(0,5).flat() },
+  { id:'seion', label:'All 46 basic', sub:'seion', pick:() => SEION_ROWS.flat() },
+  { id:'dakuten', label:'With marks', sub:'dakuten ゛゜', pick:() => DAKUTEN_ROWS.flat() },
+  { id:'youon', label:'Combined', sub:'youon きゃ・しゃ…', pick:() => YOUON_ROWS.flat() },
+  { id:'weak', label:'My weak spots', sub:'what you keep missing', pick:() => null },
+];
+let Q = { list:[], i:0, score:0, item:null, tries:0, type:'' };
+
+document.getElementById('scopeList').innerHTML = SCOPES.map(s =>
+  '<button class="glass" data-s="' + s.id + '">' + s.label + '<small>' + s.sub + '</small></button>').join('');
+document.getElementById('scopeList').addEventListener('click', e => {
+  const b = e.target.closest('button[data-s]');
+  if (b) startQuiz(b.dataset.s);
+});
+
+function poolFor(id){
+  const sc = SCOPES.find(s => s.id === id);
+  let keys;
+  if (id === 'weak'){
+    const scored = ORDER.filter(k => !NO_QUIZ.has(k) && ST.quiz[k]);
+    scored.sort((a,b) => (ST.quiz[b].x||0) - (ST.quiz[a].x||0));
+    keys = scored.filter(k => (ST.quiz[k].x||0) > 0).slice(0, 20);
+    if (keys.length < 4) keys = SEION_ROWS.flat().filter(Boolean).map(s => s.split('|')[0]);
+  } else {
+    keys = sc.pick().filter(Boolean).map(s => s.split('|')[0]);
+  }
+  return keys.filter(k => !NO_QUIZ.has(k) && ITEMS[k]);
+}
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+function distractors(k, pool, n){
+  const out = [];
+  const group = CONFUSE.find(g => g.indexOf(k) >= 0);
+  if (group) group.forEach(c => { if (c !== k && ITEMS[c] && out.indexOf(c) < 0) out.push(c); });
+  const same = pool.filter(c => c !== k && out.indexOf(c) < 0 && ITEMS[c].row === ITEMS[k].row);
+  shuffle(same).forEach(c => out.push(c));
+  const rest = pool.filter(c => c !== k && out.indexOf(c) < 0);
+  shuffle(rest).forEach(c => out.push(c));
+  const seen = {};
+  return out.filter(c => {
+    const r = ITEMS[c].r;
+    if (r === ITEMS[k].r || seen[r]) return false;
+    seen[r] = 1; return true;
+  }).slice(0, n);
+}
+function startQuiz(scopeId){
+  const pool = poolFor(scopeId);
+  const picked = shuffle(pool.slice()).slice(0, 10);
+  while (picked.length < 10 && pool.length) picked.push(pool[Math.floor(Math.random() * pool.length)]);
+  Q = { list:picked, i:0, score:0, pool:pool, item:null, tries:0, type:'' };
+  document.body.classList.add('quiz-on');
+  document.body.classList.remove('quiz-done');
+  nextQuestion();
+}
+function nextQuestion(){
+  if (Q.i >= Q.list.length) return endQuiz();
+  Q.item = Q.list[Q.i]; Q.tries = 0;
+  const types = ['k2r','r2k'];
+  if (hasAudio(Q.item) && !ST.muted) types.push('a2k');
+  Q.type = types[Math.floor(Math.random() * types.length)];
+  document.getElementById('quizProgress').textContent = (Q.i + 1) + ' / ' + Q.list.length;
+  document.getElementById('quizScore').innerHTML = '<b>' + Q.score + '</b> / ' + Q.list.length;
+  document.getElementById('quizMsg').textContent = '';
+  document.getElementById('quizMsg').className = '';
+  const qEl = document.getElementById('quizQ');
+  qEl.className = '';
+  const it = ITEMS[Q.item];
+  if (Q.type === 'k2r'){
+    qEl.innerHTML = '<div class="big">' + it.k + '</div><div class="hint">How do you read this?</div>';
+  } else if (Q.type === 'r2k'){
+    qEl.innerHTML = '<div class="rj">' + it.r + '</div><div class="hint">Which character is this?</div>';
+  } else {
+    qEl.innerHTML = '<button class="audio" id="qAudio">🔊</button><div class="hint">Listen, then choose</div>';
+    setTimeout(() => speak(it.k), 250);
+    qEl.querySelector('#qAudio').addEventListener('click', () => speak(it.k));
+  }
+  const wrongs = distractors(Q.item, Q.pool, 3);
+  const opts = shuffle([Q.item].concat(wrongs));
+  const asRomaji = Q.type === 'k2r';
+  document.getElementById('quizChoices').innerHTML = opts.map(k =>
+    '<button class="glass' + (asRomaji ? ' rj' : '') + '" data-k="' + k + '">' +
+    (asRomaji ? ITEMS[k].r : k) + '</button>').join('');
+}
+document.getElementById('quizChoices').addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]');
+  if (!b || b.classList.contains('wrong')) return;
+  const it = ITEMS[Q.item];
+  const st = ST.quiz[Q.item] || (ST.quiz[Q.item] = { c:0, x:0 });
+  const qEl = document.getElementById('quizQ'), msg = document.getElementById('quizMsg');
+  if (b.dataset.k === Q.item){
+    b.classList.add('right');
+    qEl.classList.add('flash-ok');
+    if (Q.tries === 0){ Q.score++; st.c++; }
+    st.x = Math.max(0, st.x - (Q.tries === 0 ? 1 : 0));
+    save();
+    msg.textContent = it.k + ' = ' + it.r + (it.w ? '  (' + it.w + ' — ' + it.we + ')' : '');
+    msg.className = 'ok';
+    blip(880, .12);
+    speak(it.k);
+    document.getElementById('quizScore').innerHTML = '<b>' + Q.score + '</b> / ' + Q.list.length;
+    Array.prototype.forEach.call(document.querySelectorAll('#quizChoices button'), x => x.disabled = true);
+    setTimeout(() => { Q.i++; buildChart(); nextQuestion(); }, 1150);
+  } else {
+    b.classList.add('wrong');
+    qEl.classList.add('flash-ng');
+    setTimeout(() => qEl.classList.remove('flash-ng'), 300);
+    if (Q.tries === 0){ st.x = (st.x || 0) + 1; save(); }
+    Q.tries++;
+    msg.textContent = 'Not quite — that one is ' + ITEMS[b.dataset.k].r + '. Try again!';
+    msg.className = 'ng';
+    blip(200, .15);
+  }
+});
+function endQuiz(){
+  document.body.classList.add('quiz-done');
+  const s = Q.score, n = Q.list.length;
+  document.getElementById('endScore').textContent = s + ' / ' + n + ' on the first try';
+  document.getElementById('endFace').textContent = s === n ? '🏆' : s >= n * .7 ? '🌸' : '💪';
+  document.getElementById('endMsg').textContent = s === n ? 'Perfect! You really know these.'
+    : s >= n * .7 ? 'Nice work! A few more rounds and they are yours.'
+    : 'Keep going — tap a character in the chart to see how it is written.';
+  if (s === n && ST.badges.indexOf('perfect') < 0){ ST.badges.push('perfect'); }
+  save(); buildChart();
+}
+document.getElementById('quizQuit').addEventListener('click', () => {
+  document.body.classList.remove('quiz-on','quiz-done');
+});
+document.getElementById('quizAgain').addEventListener('click', () => {
+  document.body.classList.remove('quiz-on','quiz-done');
+});
+document.getElementById('quizBack').addEventListener('click', () => {
+  document.body.classList.remove('quiz-on','quiz-done');
+  document.body.dataset.mode = 'chart';
+});
+
+/* ================= tabs, mute, boot ================= */
+document.getElementById('tabChart').addEventListener('click', () => { document.body.dataset.mode = 'chart'; });
+document.getElementById('tabQuiz').addEventListener('click', () => { document.body.dataset.mode = 'quiz'; });
+const muteBtn = document.getElementById('muteBtn');
+function syncMute(){ muteBtn.textContent = ST.muted ? '🔇' : '🔊'; }
+muteBtn.addEventListener('click', () => {
+  ST.muted = !ST.muted; save(); syncMute();
+  if (ST.muted && curAudio){ curAudio.pause(); curAudio.currentTime = 0; }
+});
+document.addEventListener('keydown', e => {
+  if (!document.body.classList.contains('card-open')) return;
+  if (e.key === 'Escape') closeCard();
+  if (e.key === 'ArrowLeft') move(-1);
+  if (e.key === 'ArrowRight') move(1);
+});
+
+if (!window.KANA_STROKES || !window.KANA_TABLES) document.getElementById('errBanner').style.display = 'block';
+syncMute();
+if (ST.slow) document.getElementById('btnSlow').classList.add('on');
+buildChart();
+if (location.hash){
+  const k = decodeURIComponent(location.hash.slice(1));
+  if (ITEMS[k]) openCard(k);
+}
+</script>
+</body>
+</html>

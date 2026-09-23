@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B — Soft</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#4b4361; --sub:#9b93ae; --card:#ffffff;
+  --pink:#ff9ec2; --blue:#7fd0f5; --yellow:#ffd36a; --mint:#8fe3c8;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  color:var(--ink);background:#fbf7ff;
+  font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",sans-serif;font-weight:500;
+  padding-bottom:40px;position:relative;overflow-x:hidden;
+}
+body::before,body::after{
+  content:"";position:fixed;border-radius:50%;filter:blur(60px);opacity:.55;z-index:-1;
+}
+body::before{width:300px;height:300px;background:#ffd9ea;top:-110px;left:-80px}
+body::after{width:300px;height:300px;background:#d5ecff;top:180px;right:-120px}
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer;font-weight:700}
+
+header{padding:22px 20px 10px;display:flex;align-items:center;justify-content:space-between}
+h1{font-size:23px;font-weight:800;letter-spacing:.02em}
+h1 em{font-style:normal;font-family:Quicksand,sans-serif;font-size:11px;color:var(--sub);display:block;letter-spacing:.2em;margin-top:3px}
+.count{background:#fff;border-radius:999px;padding:9px 15px;font-size:13px;font-weight:700;
+       box-shadow:0 6px 18px rgba(120,100,160,.13)}
+.count b{color:var(--pink)}
+
+nav{display:flex;gap:9px;padding:6px 20px 0}
+nav button{flex:1;padding:13px;border-radius:16px;font-size:14px;background:#fff;color:var(--sub);
+           box-shadow:0 5px 14px rgba(120,100,160,.1)}
+nav button.on{background:linear-gradient(135deg,#ffb3d2,#ff8fc0);color:#fff;box-shadow:0 8px 20px rgba(255,143,192,.42)}
+
+section{padding:22px 20px 0}
+.sec{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.sec h2{font-size:16px;font-weight:800}
+.sec span{font-size:11px;color:var(--sub);background:#fff;padding:4px 10px;border-radius:999px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+.cell{aspect-ratio:1;background:#fff;border-radius:18px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:2px;position:relative;
+      box-shadow:0 6px 16px rgba(120,100,160,.11);transition:transform .15s}
+.cell .k{font-size:27px;font-weight:700;line-height:1}
+.cell .r{font-size:10px;color:var(--sub);font-family:Quicksand,sans-serif;font-weight:700}
+.cell.done{background:linear-gradient(160deg,#fff0f7,#ffe2ef)}
+.cell.done .dot{position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;
+                background:var(--pink);box-shadow:0 0 0 3px rgba(255,158,194,.25)}
+.cell.empty{background:rgba(255,255,255,.4);box-shadow:none}
+
+.card{margin:30px 16px 0;background:#fff;border-radius:30px;padding:22px 20px 24px;
+      box-shadow:0 20px 44px rgba(120,100,160,.16)}
+.cardhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cardhead .t .kk{font-size:26px;font-weight:800;line-height:1.1}
+.cardhead .t .rr{font-size:13px;color:var(--pink);font-family:Quicksand,sans-serif;font-weight:700;letter-spacing:.1em}
+.cardhead .nav{display:flex;gap:7px}
+.cardhead .nav button{width:38px;height:38px;border-radius:50%;background:#f7f3fb;color:var(--sub);font-size:15px}
+.box{width:228px;height:228px;margin:0 auto 18px;background:#fbf8fe;border-radius:26px;position:relative}
+.box svg{width:100%;height:100%;display:block}
+.guide{stroke:#d9c9ef;stroke-width:.8;stroke-dasharray:3 6;fill:none}
+.st{fill:none;stroke:#5a5175;stroke-width:6.4;stroke-linecap:round;stroke-linejoin:round}
+.st.ghost{stroke:rgba(120,100,160,.12)}
+.num{font-size:8.4px;fill:var(--pink);font-family:Quicksand,sans-serif;font-weight:700;opacity:0}
+.num.on{opacity:1}
+.seg{display:flex;gap:7px;background:#f5f1fa;padding:5px;border-radius:999px;margin:0 auto 16px;width:228px}
+.seg button{flex:1;padding:10px;border-radius:999px;font-size:13px;color:var(--sub)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 4px 10px rgba(120,100,160,.14)}
+.row{display:flex;gap:9px;justify-content:center;margin-bottom:16px}
+.row button{background:#f7f3fb;border-radius:14px;padding:11px 16px;font-size:13px;color:var(--ink)}
+.listen{display:block;width:100%;padding:15px;border-radius:18px;font-size:15px;color:#fff;
+        background:linear-gradient(135deg,#8fd9ff,#6ec9f5);box-shadow:0 10px 22px rgba(110,201,245,.4);margin-bottom:16px}
+.word{background:#fffaf2;border-radius:20px;padding:15px;text-align:center}
+.word .w{font-size:23px;font-weight:700}
+.word .wr{font-size:12px;color:#e9a13c;font-family:Quicksand,sans-serif;font-weight:700;margin:3px 0}
+.word .we{font-size:12.5px;color:var(--sub)}
+</style></head><body>
+
+<header>
+  <h1>ひらがなくん<em>HIRAGANA KUN</em></h1>
+  <div class="count">⭐ <b>12</b>/46</div>
+</header>
+
+<nav><button class="on">ひょう</button><button>かく</button><button>クイズ</button></nav>
+
+<section>
+  <div class="sec"><h2>Basic 46</h2><span>seion</span></div>
+  <div class="grid">
+    <div class="cell done"><span class="dot"></span><span class="k">あ</span><span class="r">a</span></div>
+    <div class="cell done"><span class="dot"></span><span class="k">い</span><span class="r">i</span></div>
+    <div class="cell done"><span class="dot"></span><span class="k">う</span><span class="r">u</span></div>
+    <div class="cell"><span class="k">え</span><span class="r">e</span></div>
+    <div class="cell"><span class="k">お</span><span class="r">o</span></div>
+    <div class="cell done"><span class="dot"></span><span class="k">か</span><span class="r">ka</span></div>
+    <div class="cell"><span class="k">き</span><span class="r">ki</span></div>
+    <div class="cell"><span class="k">く</span><span class="r">ku</span></div>
+    <div class="cell"><span class="k">け</span><span class="r">ke</span></div>
+    <div class="cell"><span class="k">こ</span><span class="r">ko</span></div>
+    <div class="cell"><span class="k">さ</span><span class="r">sa</span></div>
+    <div class="cell"><span class="k">し</span><span class="r">shi</span></div>
+    <div class="cell"><span class="k">す</span><span class="r">su</span></div>
+    <div class="cell"><span class="k">せ</span><span class="r">se</span></div>
+    <div class="cell"><span class="k">そ</span><span class="r">so</span></div>
+  </div>
+</section>
+
+<div class="card">
+  <div class="cardhead">
+    <div class="t"><div class="kk">あ</div><div class="rr">a</div></div>
+    <div class="nav"><button>‹</button><button>›</button><button>✕</button></div>
+  </div>
+  <div class="box"><svg id="sv" viewBox="0 0 109 109"></svg></div>
+  <div class="seg"><button class="on">👀 みる</button><button>✏️ なぞる</button></div>
+  <div class="row"><button>▶ もういちど</button><button>🐢 ゆっくり</button></div>
+  <button class="listen">🔊 Listen</button>
+  <div class="word"><div class="w">あめ</div><div class="wr">ame</div><div class="we">rain</div></div>
+</div>
+
+<script src="../stroke-data.js"></script>
+<script src="mock.js"></script>
+</body></html>

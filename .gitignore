@@ -1,0 +1,4 @@
+.DS_Store
+# 録音の原本（配信には不要・ローカルに保管）
+audio/raw/
+.claude/

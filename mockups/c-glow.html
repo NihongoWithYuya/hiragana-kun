@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C — Glow</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1020; --panel:rgba(255,255,255,.055); --edge:rgba(255,255,255,.1);
+  --ink:#eceaf6; --sub:#8b87a8; --pink:#ff5f9e; --aqua:#5ce6d5;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);color:var(--ink);padding-bottom:40px;overflow-x:hidden;
+  font-family:"Hiragino Sans","Yu Gothic",sans-serif;font-weight:400;position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;
+  background:
+    radial-gradient(520px 320px at 12% -6%, rgba(255,95,158,.20), transparent 70%),
+    radial-gradient(520px 340px at 92% 22%, rgba(92,230,213,.15), transparent 70%);
+}
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer}
+.en{font-family:Outfit,sans-serif}
+
+header{padding:24px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+h1{font-size:22px;font-weight:500;letter-spacing:.04em}
+h1 em{display:block;font-style:normal;font-size:10px;letter-spacing:.34em;color:var(--sub);
+      font-family:Outfit,sans-serif;font-weight:300;margin-top:5px}
+.count{font-family:Outfit,sans-serif;font-size:12px;letter-spacing:.14em;color:var(--sub);
+       border:1px solid var(--edge);border-radius:999px;padding:8px 14px}
+.count b{color:var(--aqua);font-weight:700}
+
+nav{display:flex;gap:8px;padding:6px 20px 0}
+nav button{flex:1;padding:12px;font-size:12.5px;letter-spacing:.16em;color:var(--sub);
+           border:1px solid var(--edge);border-radius:12px;background:var(--panel);font-family:Outfit,sans-serif}
+nav button.on{color:#0e1020;background:linear-gradient(120deg,#ff7fb0,#ff5f9e);border-color:transparent;
+              box-shadow:0 0 26px rgba(255,95,158,.45);font-weight:700}
+
+section{padding:24px 20px 0}
+.sec{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec h2{font-size:14px;font-weight:500;letter-spacing:.14em;font-family:Outfit,sans-serif}
+.sec i{flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent)}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cell{aspect-ratio:1;background:var(--panel);border:1px solid var(--edge);border-radius:14px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative}
+.cell .k{font-size:27px;line-height:1;font-weight:400}
+.cell .r{font-size:9.5px;color:var(--sub);font-family:Outfit,sans-serif;letter-spacing:.12em}
+.cell.done{border-color:rgba(92,230,213,.5);box-shadow:0 0 18px rgba(92,230,213,.16) inset}
+.cell.done .k{color:var(--aqua);text-shadow:0 0 14px rgba(92,230,213,.55)}
+
+.card{margin:30px 16px 0;background:rgba(255,255,255,.045);border:1px solid var(--edge);
+      border-radius:22px;padding:20px}
+.cardhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.cardhead .kk{font-size:26px}
+.cardhead .rr{font-size:11px;letter-spacing:.3em;color:var(--pink);font-family:Outfit,sans-serif;margin-top:4px}
+.cardhead .nav{display:flex;gap:7px}
+.cardhead .nav button{width:36px;height:36px;border-radius:10px;border:1px solid var(--edge);color:var(--sub);font-size:14px}
+.box{width:230px;height:230px;margin:0 auto 18px;border-radius:18px;position:relative;
+     background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.05), rgba(255,255,255,.015));
+     border:1px solid var(--edge)}
+.box svg{width:100%;height:100%;display:block}
+.guide{stroke:rgba(255,255,255,.16);stroke-width:.6;stroke-dasharray:2 6;fill:none}
+.st{fill:none;stroke:#fff;stroke-width:5.6;stroke-linecap:round;stroke-linejoin:round;
+    filter:drop-shadow(0 0 5px rgba(92,230,213,.85)) drop-shadow(0 0 14px rgba(92,230,213,.45))}
+.st.ghost{stroke:rgba(255,255,255,.09);filter:none}
+.num{font-size:8px;fill:var(--pink);font-family:Outfit,sans-serif;font-weight:700;opacity:0}
+.num.on{opacity:1}
+.seg{display:flex;gap:8px;width:230px;margin:0 auto 16px}
+.seg button{flex:1;padding:11px;border-radius:12px;border:1px solid var(--edge);font-size:12.5px;
+            letter-spacing:.1em;color:var(--sub);font-family:Outfit,sans-serif}
+.seg button.on{color:#0e1020;background:linear-gradient(120deg,#7ff0e2,#5ce6d5);border-color:transparent;
+               box-shadow:0 0 24px rgba(92,230,213,.4);font-weight:700}
+.row{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.row button{border:1px solid var(--edge);border-radius:11px;padding:10px 15px;font-size:12px;color:var(--sub);font-family:Outfit,sans-serif;letter-spacing:.1em}
+.listen{display:block;width:100%;padding:14px;border-radius:14px;font-size:13px;letter-spacing:.2em;
+        font-family:Outfit,sans-serif;color:var(--ink);border:1px solid rgba(255,95,158,.5);
+        background:rgba(255,95,158,.1);margin-bottom:16px}
+.word{text-align:center;padding-top:16px;border-top:1px solid var(--edge)}
+.word .w{font-size:23px}
+.word .wr{font-size:11px;letter-spacing:.24em;color:var(--pink);font-family:Outfit,sans-serif;margin:6px 0 3px}
+.word .we{font-size:12px;color:var(--sub)}
+</style></head><body>
+
+<header>
+  <h1>ひらがなくん<em>HIRAGANA KUN</em></h1>
+  <div class="count"><b>12</b> / 46</div>
+</header>
+
+<nav><button class="on">CHART</button><button>WRITE</button><button>QUIZ</button></nav>
+
+<section>
+  <div class="sec"><h2>BASIC 46</h2><i></i></div>
+  <div class="grid">
+    <div class="cell done"><span class="k">あ</span><span class="r">a</span></div>
+    <div class="cell done"><span class="k">い</span><span class="r">i</span></div>
+    <div class="cell done"><span class="k">う</span><span class="r">u</span></div>
+    <div class="cell"><span class="k">え</span><span class="r">e</span></div>
+    <div class="cell"><span class="k">お</span><span class="r">o</span></div>
+    <div class="cell done"><span class="k">か</span><span class="r">ka</span></div>
+    <div class="cell"><span class="k">き</span><span class="r">ki</span></div>
+    <div class="cell"><span class="k">く</span><span class="r">ku</span></div>
+    <div class="cell"><span class="k">け</span><span class="r">ke</span></div>
+    <div class="cell"><span class="k">こ</span><span class="r">ko</span></div>
+    <div class="cell"><span class="k">さ</span><span class="r">sa</span></div>
+    <div class="cell"><span class="k">し</span><span class="r">shi</span></div>
+    <div class="cell"><span class="k">す</span><span class="r">su</span></div>
+    <div class="cell"><span class="k">せ</span><span class="r">se</span></div>
+    <div class="cell"><span class="k">そ</span><span class="r">so</span></div>
+  </div>
+</section>
+
+<div class="card">
+  <div class="cardhead">
+    <div><div class="kk">あ</div><div class="rr">A</div></div>
+    <div class="nav"><button>‹</button><button>›</button><button>✕</button></div>
+  </div>
+  <div class="box"><svg id="sv" viewBox="0 0 109 109"></svg></div>
+  <div class="seg"><button class="on">WATCH</button><button>TRACE</button></div>
+  <div class="row"><button>REPLAY</button><button>SLOW</button></div>
+  <button class="listen">LISTEN</button>
+  <div class="word"><div class="w">あめ</div><div class="wr">AME</div><div class="we">rain</div></div>
+</div>
+
+<script src="../stroke-data.js"></script>
+<script src="mock.js"></script>
+</body></html>
