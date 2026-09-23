@@ -80,6 +80,7 @@ python3 tools/build_audio.py         # 無音カット＋音量そろえ＋m4a�
 open "http://localhost:8765/tools/record.html?set=foreign"
 ```
 
+**例の単語: 録音済み 214/214**（1本0.34〜1.26秒、平均0.75秒）。
 例の単語（ひらがな103語＋カタカナ111語＝214語）を録るときは `?set=words`。`audio/w-<codepoints>.m4a` として書き出され、
 録音のある単語だけカードに 🔊 ボタンが出ます（て・め のように文字と同じ形の単語も `w-` で区別）:
 
