@@ -97,17 +97,6 @@ h2 span{font-size:10.5px;color:var(--sub);letter-spacing:.1em;text-transform:non
 .cell.rare::after{content:"rare";position:absolute;top:5px;right:6px;font-family:Outfit,sans-serif;font-size:7.5px;letter-spacing:.06em;color:var(--sub);opacity:.8}
 .gap{aspect-ratio:1;border:1px dashed rgba(255,255,255,.07);border-radius:14px}
 
-/* ---------- badges ---------- */
-#badges{margin-top:30px;border:1px solid var(--edge);border-radius:18px;padding:16px;background:rgba(255,255,255,.03)}
-#badges h3{font-size:12px;font-family:Outfit,sans-serif;letter-spacing:.18em;color:var(--sub);margin-bottom:12px;text-transform:uppercase}
-#badgeList{display:flex;flex-wrap:wrap;gap:8px}
-.badge{
-  border:1px solid rgba(92,230,213,.45);border-radius:999px;padding:7px 13px;font-size:12px;
-  display:flex;align-items:center;gap:6px;color:var(--aqua);background:rgba(92,230,213,.07);
-  box-shadow:0 0 18px rgba(92,230,213,.15);
-}
-.badge.locked{border-color:var(--edge);color:var(--sub);background:none;box-shadow:none;opacity:.5}
-
 /* ---------- character card ---------- */
 /* glow is the card's own background with attachment:local, so it spans the whole scrolled
    content — a fixed ::before inside the transformed card scrolled away and left a hard edge */
@@ -308,10 +297,6 @@ footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid 
     <h2>Combined sounds <span>youon &middot; big + small kana</span></h2>
     <div class="grid youon" id="gridYouon"></div>
 
-    <div id="badges">
-      <h3>🏅 Stickers</h3>
-      <div id="badgeList"></div>
-    </div>
   </section>
 
   <section id="quizPane">
@@ -424,7 +409,7 @@ YOUON_ROWS.forEach((row,i) => row.forEach(s => parse(s, 'youon', i)));
 
 /* ================= storage ================= */
 const KEY = 'hiragana-kun.v1';
-let ST = { v:1, traced:{}, quiz:{}, badges:[], muted:false, slow:false };
+let ST = { v:1, traced:{}, quiz:{}, muted:false, slow:false };
 try {
   const raw = localStorage.getItem(KEY);
   if (raw) ST = Object.assign(ST, JSON.parse(raw));
@@ -492,7 +477,6 @@ function buildChart(){
   mk([SMALL_ROW], document.getElementById('gridSmall'));
   mk(YOUON_ROWS, document.getElementById('gridYouon'));
   document.getElementById('score').innerHTML = '<b>' + learnedCount() + '</b> / ' + ORDER.length;
-  buildBadges();
 }
 document.querySelectorAll('.grid').forEach(g => {
   g.addEventListener('click', e => {
@@ -500,28 +484,6 @@ document.querySelectorAll('.grid').forEach(g => {
     if (b) openCard(b.dataset.k);
   });
 });
-
-/* ================= badges ================= */
-const ROW_NAMES = ['a','ka','sa','ta','na','ha','ma','ya','ra','wa','n'];
-function badgeDefs(){
-  const defs = SEION_ROWS.map((row, i) => ({
-    id: 'row' + i, icon: '🌸', label: ROW_NAMES[i] + '-row',
-    done: row.filter(Boolean).every(s => isLearned(s.split('|')[0]))
-  }));
-  const allOf = rows => rows.flat().filter(Boolean).every(s => isLearned(s.split('|')[0]));
-  defs.push({ id:'dakuten', icon:'💧', label:'all dakuten', done: allOf(DAKUTEN_ROWS) });
-  defs.push({ id:'youon', icon:'🎵', label:'all youon', done: allOf(YOUON_ROWS) });
-  const traced = Object.keys(ST.traced).length;
-  defs.push({ id:'t10', icon:'✏️', label:'traced 10', done: traced >= 10 });
-  defs.push({ id:'t50', icon:'🖌️', label:'traced 50', done: traced >= 50 });
-  defs.push({ id:'perfect', icon:'🏆', label:'perfect quiz', done: ST.badges.indexOf('perfect') >= 0 });
-  defs.push({ id:'all46', icon:'👑', label:'all 46 basic', done: allOf(SEION_ROWS) });
-  return defs;
-}
-function buildBadges(){
-  document.getElementById('badgeList').innerHTML = badgeDefs().map(d =>
-    '<span class="badge' + (d.done ? '' : ' locked') + '">' + d.icon + ' ' + d.label + '</span>').join('');
-}
 
 /* ================= glyph rendering ================= */
 const SVGNS = 'http://www.w3.org/2000/svg';
@@ -981,7 +943,6 @@ function endQuiz(){
   document.getElementById('endMsg').textContent = s === n ? 'Perfect! You really know these.'
     : s >= n * .7 ? 'Nice work! A few more rounds and they are yours.'
     : 'Keep going — tap a character in the chart to see how it is written.';
-  if (s === n && ST.badges.indexOf('perfect') < 0){ ST.badges.push('perfect'); }
   save(); buildChart();
 }
 document.getElementById('quizQuit').addEventListener('click', () => {
