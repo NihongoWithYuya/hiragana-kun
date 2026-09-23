@@ -56,6 +56,8 @@ h1 small{display:block;font-family:Outfit,sans-serif;font-size:10px;letter-spaci
 .msg.err{color:var(--ng)}
 
 .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;margin-top:22px}
+body.words .list{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+body.words .list button{aspect-ratio:auto;padding:8px 4px}
 .list button{aspect-ratio:1;font-size:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--sub)}
 .list button em{font-style:normal;font-family:Outfit,sans-serif;font-size:8px;letter-spacing:.1em}
 .list button.has{color:var(--aqua);border-color:rgba(92,230,213,.45);background:rgba(92,230,213,.07)}
@@ -69,7 +71,7 @@ h1 small{display:block;font-family:Outfit,sans-serif;font-size:10px;letter-spaci
   <h1>録音スタジオ<small>HIRAGANA-KUN VOICE</small></h1>
 
   <div class="setup">
-    <b>使い方</b>
+    <b>使い方</b><span id="wordsNote"></span>
     <ol>
       <li>「保存先フォルダを選ぶ」で <b>hiragana-kun/audio/raw</b> を選択</li>
       <li>大きく表示されたかなを1文字ずつ読む（スペースキーでも録音開始/停止）</li>
@@ -104,7 +106,7 @@ h1 small{display:block;font-family:Outfit,sans-serif;font-size:10px;letter-spaci
   <div class="list" id="list"></div>
 </div>
 
-<script src="../kana-data.js"></script>
+<script src="../kana-data.js?v=4"></script>
 <script>
 "use strict";
 const T = window.KANA_TABLES;
@@ -120,9 +122,26 @@ T.small.forEach(push);
 T.youon.forEach(row => row.forEach(push));
 
 /* ?set=foreign — katakana-only sounds (ファ, ティ…). Other katakana reuse the hiragana recordings. */
-if (new URLSearchParams(location.search).get('set') === 'foreign'){
+const SET = new URLSearchParams(location.search).get('set');
+if (SET === 'foreign'){
   ITEMS.length = 0;
   window.KATAKANA_TABLES.foreign.forEach(row => row.forEach(push));
+}
+/* ?set=words — every example word once (hiragana then katakana), saved as w-<codepoints> */
+const WORDS = SET === 'words';
+if (WORDS){
+  ITEMS.length = 0;
+  const seen = {};
+  [window.KANA_TABLES, window.KATAKANA_TABLES].forEach(t => {
+    [].concat(t.seion.flat(), t.dakuten.flat(), t.small, t.youon.flat(), (t.foreign || []).flat())
+      .filter(Boolean).forEach(s => {
+        const p = s.split('|');
+        if (!p[2]) return;
+        if (seen[p[2]]){ seen[p[2]].of.push(p[0]); return; }
+        const it = { k:p[2], r:p[3], we:p[4], of:[p[0]] };
+        seen[p[2]] = it; ITEMS.push(it);
+      });
+  });
 }
 
 /* ?only=ひ,ふ,ほ — re-record just these */
@@ -133,12 +152,18 @@ if (only){
   if (keep.length) ITEMS.length = 0, ITEMS.push.apply(ITEMS, keep);
 }
 
-const keyOf = k => Array.from(k).map(c => c.codePointAt(0).toString(16)).join('-');
+const keyOf = k => (WORDS ? 'w-' : '') + Array.from(k).map(c => c.codePointAt(0).toString(16)).join('-');
 const have = {};           // key -> true
 let dirHandle = null, idx = 0, rec = null, chunks = [], lastBlob = null, stream = null;
 let ext = 'webm', mime = '';
 
 const $ = id => document.getElementById(id);
+if (WORDS){
+  document.body.classList.add('words');
+  $('wordsNote').innerHTML = '（例の単語モード: ひらがな103語 → カタカナ111語の順。途中でやめても「未録音へ跳ぶ」で続きから録れます。' +
+    '1語1〜1.5秒、ふだんのアクセントで）';
+  document.title = 'ひらがなくん — 録音スタジオ（例の単語）';
+}
 function msg(t, err){ $('msg').textContent = t || ''; $('msg').className = 'msg' + (err ? ' err' : ''); }
 
 /* ---------- folder ---------- */
@@ -150,7 +175,7 @@ $('pick').addEventListener('click', async () => {
   try {
     dirHandle = await window.showDirectoryPicker({ mode:'readwrite' });
     for await (const [name, h] of dirHandle.entries()){
-      if (h.kind === 'file'){ const m = name.match(/^([0-9a-f-]+)\./); if (m) have[m[1]] = true; }
+      if (h.kind === 'file'){ const m = name.match(/^((?:w-)?[0-9a-f-]+)\./); if (m) have[m[1]] = true; }
     }
     $('pickState').textContent = '保存先: ' + dirHandle.name + '（既存 ' + Object.keys(have).length + ' 件を検出）';
     render();
@@ -259,21 +284,27 @@ function render(){
   const it = ITEMS[idx];
   $('pos').textContent = (idx + 1) + ' / ' + ITEMS.length;
   $('kana').textContent = it.k;
+  // long words (コンピューター) shrink to fit the stage
+  $('kana').style.fontSize = WORDS
+    ? Math.min(86, Math.floor(Math.min(500, window.innerWidth - 90) / Array.from(it.k).length)) + 'px' : '';
   $('romaji').textContent = it.r;
-  $('hint').innerHTML = it.w
+  $('hint').innerHTML = WORDS
+    ? '意味: ' + it.we + '（' + it.of.join('・') + ' の例）<br>ふだん話すときの<b>自然なアクセント</b>で、1回だけ読んでください'
+    : it.w
     ? '例: ' + it.w + '（' + it.wr + ' — ' + it.we + '）<br>読むのは <b>' + it.k + '</b> の音だけです'
     : '読むのは <b>' + it.k + '</b> の音だけです';
   const n = ITEMS.filter(x => have[keyOf(x.k)]).length;   // the folder also holds the other set's files
   $('doneCount').innerHTML = '録音済み <b>' + n + '</b> / ' + ITEMS.length;
   $('list').innerHTML = ITEMS.map((x, i) =>
     '<button class="' + (have[keyOf(x.k)] ? 'has ' : '') + (i === idx ? 'cur' : '') + '" data-i="' + i + '">' +
-    x.k + '<em>' + x.r + '</em></button>').join('');
+    (WORDS ? '<span style="font-size:11px">' + x.k + '</span>' : x.k) + '<em>' + x.r + '</em></button>').join('');
 }
 $('list').addEventListener('click', e => {
   const b = e.target.closest('button[data-i]');
   if (b) go(+b.dataset.i);
 });
 render();
+window.addEventListener('resize', render);
 </script>
 </body>
 </html>

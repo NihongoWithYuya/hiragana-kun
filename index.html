@@ -217,6 +217,9 @@ body[data-cmode="watch"] #traceCtrl{display:none}
 #sayBtn[disabled]{opacity:.4;border-color:var(--edge);background:none}
 #wordBox{padding-top:16px;border-top:1px solid var(--edge);text-align:center;line-height:1.6}
 #wordBox .w{font-size:22px}
+#wordBox button.w{display:inline-flex;align-items:center;gap:10px;padding:6px 14px 6px 16px;border-radius:14px;
+                  border-color:rgba(255,95,158,.45);background:rgba(255,95,158,.08)}
+#wordBox button.w .spk{font-size:15px}
 #wordBox .wr{font-family:Outfit,sans-serif;font-size:11px;letter-spacing:.22em;color:var(--pink);margin:6px 0 3px;text-transform:uppercase}
 #wordBox .we{font-size:13px;color:var(--sub)}
 #wordBox .note{font-size:12.5px;color:var(--sub);margin-top:10px;line-height:1.7}
@@ -424,9 +427,9 @@ footer a{color:rgba(92,230,213,.8);text-decoration:none;border-bottom:1px solid 
   </div>
 </div>
 
-<script src="kana-data.js?v=3"></script>
-<script src="stroke-data.js?v=3"></script>
-<script src="audio/manifest.js?v=3"></script>
+<script src="kana-data.js?v=4"></script>
+<script src="stroke-data.js?v=4"></script>
+<script src="audio/manifest.js?v=4"></script>
 <script>
 "use strict";
 
@@ -545,9 +548,18 @@ function audioKey(kana){
   }).join('-');
 }
 function hasAudio(kana){ return !!(window.KANA_AUDIO && window.KANA_AUDIO[audioKey(kana)]); }
+/* example words: audio/w-<codepoints>.m4a (the w- keeps て/め the word apart from て/め the kana) */
+function wordKey(w){ return 'w-' + Array.from(w).map(c => c.codePointAt(0).toString(16)).join('-'); }
+function hasWordAudio(w){ return !!(w && window.KANA_AUDIO && window.KANA_AUDIO[wordKey(w)]); }
 function speak(kana){
   if (ST.muted || !hasAudio(kana)) return;
-  const key = audioKey(kana);
+  playKey(audioKey(kana));
+}
+function speakWord(w){
+  if (ST.muted || !hasWordAudio(w)) return;
+  playKey(wordKey(w));
+}
+function playKey(key){
   let a = audioCache[key];
   if (!a){ a = audioCache[key] = new Audio('audio/' + key + '.m4a'); a.preload = 'auto'; }
   try {
@@ -894,7 +906,10 @@ function openCard(kana, keepMode){
   const canTrace = kana.length === 1;
   document.getElementById('seg').style.display = canTrace ? '' : 'none';
   let wb = '';
-  if (it.w) wb = '<div class="w">' + it.w + '</div><div class="wr">' + it.wr + '</div><div class="we">' + it.we + '</div>';
+  if (it.w) wb = (hasWordAudio(it.w)
+      ? '<button class="w glass" data-w="' + it.w + '">' + it.w + '<span class="spk">🔊</span></button>'
+      : '<div class="w">' + it.w + '</div>') +
+    '<div class="wr">' + it.wr + '</div><div class="we">' + it.we + '</div>';
   if (it.note) wb += '<div class="note">💡 ' + it.note + '</div>';
   if (!canTrace) wb += '<div class="parts">Practise writing each part: ' +
     Array.from(kana).map(ch => '<button data-k="' + partOf(ch) + '">' + ch + '</button>').join('') + '</div>';
@@ -956,6 +971,8 @@ document.getElementById('btnShow').addEventListener('click', () => {
 });
 document.getElementById('sayBtn').addEventListener('click', () => speak(current));
 document.getElementById('wordBox').addEventListener('click', e => {
+  const w = e.target.closest('button[data-w]');
+  if (w) return speakWord(w.dataset.w);
   const b = e.target.closest('button[data-k]');
   if (b) openCard(b.dataset.k, 'trace');
 });
